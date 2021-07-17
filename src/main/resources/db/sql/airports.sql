@@ -1,0 +1,14 @@
+insert into Airport( airport_id, city) values (1, 'London');
+insert into Airport( airport_id, city) values (2, 'Warsaw');
+insert into Airport( airport_id, city) values (3, 'Krakow');
+insert into Airport( airport_id, city) values (4, 'Tenerife');
+insert into Airport( airport_id, city) values (5, 'Denmark');
+insert into Airport( airport_id, city) values (6, 'Berlin');
+insert into Airport( airport_id, city) values (7, 'Munich');
+insert into Airport( airport_id, city) values (8, 'Barcelona');
+insert into Airport( airport_id, city) values (9, 'Paris');
+insert into Airport( airport_id, city) values (10, 'London');
+insert into Airport( airport_id, city) values (11, 'Amsterdam');
+insert into Airport( airport_id, city) values (12, 'Rome');
+insert into Airport( airport_id, city) values (13, 'Athens');
+insert into Airport( airport_id, city) values (14, 'Zadar');

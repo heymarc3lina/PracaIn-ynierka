@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - property:
+      name: textType
+      value: text
+      dbms: postgresql
+      global: true
+
+  - include:
+      file: db/changelog/db.changelog-1.0.yaml
+
+

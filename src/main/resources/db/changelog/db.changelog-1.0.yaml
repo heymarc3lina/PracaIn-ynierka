@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: load data to plain table
+      author: AgataPietrzycka
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/data.sql
+
+
+
+  - changeSet:
+      id: load data to airports table
+      author: AgataPietrzycka
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/airports.sql
