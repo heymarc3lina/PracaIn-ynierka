@@ -13,7 +13,7 @@ import com.agatapietrzycka.ticketreservation.repository.AirportRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightInformationRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightRepository;
 import com.agatapietrzycka.ticketreservation.repository.PlainRepository;
-import com.agatapietrzycka.ticketreservation.util.exception.TheSameAirportException;
+import com.agatapietrzycka.ticketreservation.util.exception.CustomCreatingFlighttException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,11 +107,23 @@ public class FlightService {
         List<String> errorMessages = new ArrayList<>();
 
         if(flight.getArrivalAirport().getAirportId() == flight.getDepartureAirport().getAirportId()){
-           errorMessages.add(new TheSameAirportException("The same airports are choosen: arrival airport = departure airport.").getMessage());
+           errorMessages.add(new CustomCreatingFlighttException("The same airports are choosen: arrival airport = departure airport.").getMessage());
+        }
+        if(flight.getArrivalDate() == flight.getDepartureDate()  || dateValidation(flight.getArrivalDate(), flight.getDepartureDate())){
+            errorMessages.add(new CustomCreatingFlighttException("Dates are the same or are overdue.").getMessage());
         }
 
         Validator validator = validatorFactory.getValidator();
         validator.validate(flight).forEach(err -> errorMessages.add(err.getMessage()));
         return errorMessages;
+    }
+
+    private Boolean dateValidation(Instant arrivalDate, Instant departureDate){
+        int compareArrival = arrivalDate.compareTo(Instant.now());
+        int compareDeparture = departureDate.compareTo(Instant.now());
+        if(compareArrival <= 0 || compareDeparture <= 0){
+            return true;
+        }
+        return false;
     }
 }
