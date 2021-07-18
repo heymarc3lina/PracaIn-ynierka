@@ -13,6 +13,7 @@ import com.agatapietrzycka.ticketreservation.repository.AirportRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightInformationRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightRepository;
 import com.agatapietrzycka.ticketreservation.repository.PlainRepository;
+import com.agatapietrzycka.ticketreservation.util.exception.TheSameAirportException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -104,6 +105,11 @@ public class FlightService {
 
     private List<String> getErrorMessages(Flight flight) {
         List<String> errorMessages = new ArrayList<>();
+
+        if(flight.getArrivalAirport().getAirportId() == flight.getDepartureAirport().getAirportId()){
+           errorMessages.add(new TheSameAirportException("The same airports are choosen: arrival airport = departure airport.").getMessage());
+        }
+
         Validator validator = validatorFactory.getValidator();
         validator.validate(flight).forEach(err -> errorMessages.add(err.getMessage()));
         return errorMessages;

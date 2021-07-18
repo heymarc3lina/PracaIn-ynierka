@@ -1,6 +1,7 @@
 package com.agatapietrzycka.ticketreservation.util;
 
 import com.agatapietrzycka.ticketreservation.model.enums.ClassType;
+import com.agatapietrzycka.ticketreservation.util.exception.CustomReservationException;
 
 import javax.persistence.AttributeConverter;
 
