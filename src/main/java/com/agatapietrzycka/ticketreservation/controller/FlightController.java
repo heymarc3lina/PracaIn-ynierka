@@ -1,6 +1,8 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.NewFlightDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.model.Plain;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
@@ -25,26 +27,44 @@ public class FlightController {
    private final FlightService flightService;
 
 
-   @Autowired
-       public FlightController(PlainService plainService, FlightService flightService) {
+    @Autowired
+    public FlightController(PlainService plainService, FlightService flightService) {
         this.plainService = plainService;
         this.flightService = flightService;
     }
 
     @GetMapping("/flight")
-    public List<Plain> sayHello(){
+    public List<Plain> sayHello() {
         return plainService.getPlain();
     }
 
-    @PostMapping
-    public ResponseEntity<ResponseDto> createFlight(@RequestBody NewFlightDto flightDto){
-        ResponseDto responseDto = flightService.createFlight(flightDto);
-        HttpStatus ststus = HttpStatus.OK;
-        if(responseDto.getErrorMessage().size() > 0){
-            ststus = HttpStatus.BAD_REQUEST;
-        }
-        return ResponseEntity.status(ststus).body(responseDto);
+
+    @GetMapping("/data")
+    //moze to tylko manager lotow
+    public ResponseEntity<ResponseDataDto> getDataToCreateFlight(){
+        ResponseDataDto responseDataDto = flightService.getDataToCreateFlight();
+        return ResponseEntity.status(HttpStatus.OK).body(responseDataDto);
     }
+
+
+    //moze to tylko manager lotow
+    @PostMapping
+    public ResponseEntity<ResponseDto> createFlight(@RequestBody NewFlightDto flightDto) {
+        ResponseDto responseDto = flightService.createFlight(flightDto);
+        HttpStatus status = HttpStatus.OK;
+        if (responseDto.getErrorMessage().size() > 0) {
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(responseDto);
+    }
+
+    //wszystkie loty moze widziec tylko manager
+    @GetMapping
+    public ResponseEntity<ResponseFlightListDto> getAllFlights(){
+        ResponseFlightListDto allFlights = flightService.getAllFlights();
+        return ResponseEntity.status(HttpStatus.OK).body(allFlights);
+    }
+
 
 
 }
