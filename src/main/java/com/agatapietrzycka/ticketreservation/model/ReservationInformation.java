@@ -1,8 +1,6 @@
 package com.agatapietrzycka.ticketreservation.model;
 
-import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
-import com.agatapietrzycka.ticketreservation.model.enums.Status;
-import com.agatapietrzycka.ticketreservation.util.FlightStatusEnumConverter;
+import com.agatapietrzycka.ticketreservation.model.enums.ReservationStatus;
 import com.agatapietrzycka.ticketreservation.util.StatusEnumConverter;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -32,7 +30,7 @@ public class ReservationInformation {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reservation_info_seq")
     private Long id;
     @Convert(converter = StatusEnumConverter.class)
-    private Status status;
+    private ReservationStatus reservationStatus;
     private Instant updatedAt;
     @OneToOne(mappedBy = "reservationInformation")
     private Reservation reservation;
@@ -45,12 +43,12 @@ public class ReservationInformation {
         this.id = id;
     }
 
-    public Status getStatus() {
-        return status;
+    public ReservationStatus getReservationStatus() {
+        return reservationStatus;
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
+    public void setReservationStatus(ReservationStatus reservationStatus) {
+        this.reservationStatus = reservationStatus;
         this.updatedAt = Instant.now();
     }
 

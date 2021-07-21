@@ -18,3 +18,18 @@ databaseChangeLog:
             dbms: postgresql
             encoding: UTF-8
             path: db/sql/airports.sql
+
+
+
+  - changeSet:
+      id: load data categories table
+      author: AgataPietrzycka
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/classCategories.sql
+
+
+
+

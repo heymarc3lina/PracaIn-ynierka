@@ -1,14 +1,14 @@
 package com.agatapietrzycka.ticketreservation.util;
 
-import com.agatapietrzycka.ticketreservation.model.enums.Status;
+import com.agatapietrzycka.ticketreservation.model.enums.ReservationStatus;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomReservationException;
 
 import javax.persistence.AttributeConverter;
 
-public class StatusEnumConverter implements AttributeConverter<Status, Integer> {
+public class StatusEnumConverter implements AttributeConverter<ReservationStatus, Integer> {
 
     @Override
-    public Integer convertToDatabaseColumn(Status attribute) {
+    public Integer convertToDatabaseColumn(ReservationStatus attribute) {
         switch (attribute) {
             case SUBMITTED:
                 return 1;
@@ -21,14 +21,14 @@ public class StatusEnumConverter implements AttributeConverter<Status, Integer> 
     }
 
     @Override
-    public Status convertToEntityAttribute(Integer dbData) {
+    public ReservationStatus convertToEntityAttribute(Integer dbData) {
         switch (dbData) {
             case 1:
-                return Status.SUBMITTED;
+                return ReservationStatus.SUBMITTED;
             case 2:
-                return Status.CANCELED;
+                return ReservationStatus.CANCELED;
             case 3:
-                return Status.WAITING;
+                return ReservationStatus.WAITING;
             default:
                 throw new CustomReservationException(dbData + " is not supported!");
         }

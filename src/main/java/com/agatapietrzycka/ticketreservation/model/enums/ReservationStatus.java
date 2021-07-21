@@ -1,6 +1,6 @@
 package com.agatapietrzycka.ticketreservation.model.enums;
 
-public enum Status {
+public enum ReservationStatus {
     SUBMITTED,
     CANCELED,
     WAITING
