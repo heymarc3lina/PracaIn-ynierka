@@ -1,6 +1,5 @@
 package com.agatapietrzycka.ticketreservation.controller.dto;
 
-import com.agatapietrzycka.ticketreservation.model.Plain;
 import lombok.Getter;
 
 import java.time.Instant;

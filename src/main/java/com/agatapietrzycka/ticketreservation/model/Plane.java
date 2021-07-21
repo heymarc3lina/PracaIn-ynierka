@@ -20,18 +20,18 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Plain {
+public class Plane {
     @NotNull
     private Integer place;
 
     @Id
     @SequenceGenerator(
-            name = "plain_seq",
-            sequenceName = "plain_seq",
+            name = "plane_seq",
+            sequenceName = "plane_seq",
             allocationSize = 1
     )
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "plain_seq")
-    private Long plainId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "plane_seq")
+    private Long planeId;
 
     @NotBlank
     private String name;

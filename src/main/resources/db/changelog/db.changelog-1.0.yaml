@@ -1,12 +1,12 @@
 databaseChangeLog:
   - changeSet:
-      id: load data to plain table
+      id: load data to plane table
       author: AgataPietrzycka
       changes:
         - sqlFile:
             dbms: postgresql
             encoding: UTF-8
-            path: db/sql/data.sql
+            path: db/sql/plane.sql
 
 
 
@@ -30,6 +30,32 @@ databaseChangeLog:
             encoding: UTF-8
             path: db/sql/classCategories.sql
 
+
+
+  - changeSet:
+      id: load data seats table
+      author: AgataPietrzycka
+      changes:
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/seatPlane1.sql
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/seatPlane2.sql
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/seatPlane3.sql
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/seatPlane4.sql
+        - sqlFile:
+            dbms: postgresql
+            encoding: UTF-8
+            path: db/sql/seatPlane5.sql
 
 
 

@@ -31,8 +31,8 @@ public class Seat {
     Integer seatNumber;
 
     @ManyToOne
-    @JoinColumn(name = "flight_id", nullable = false)
-    private Flight flight;
+    @JoinColumn(name = "plane_id", nullable = false)
+    private Plane plane;
 
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)

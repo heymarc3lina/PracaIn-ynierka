@@ -1,13 +1,11 @@
 package com.agatapietrzycka.ticketreservation.controller.dto;
 
 import com.agatapietrzycka.ticketreservation.model.Airport;
-import com.agatapietrzycka.ticketreservation.model.Plain;
+import com.agatapietrzycka.ticketreservation.model.Plane;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -20,7 +18,7 @@ public class ResponseDataDto {
     @Setter
     public static final class ListElement {
         List<Airport> airportList;
-        List<Plain>   plainList;
+        List<Plane> planeList;
     }
 
 

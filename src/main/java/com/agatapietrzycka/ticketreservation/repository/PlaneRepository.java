@@ -1,9 +1,9 @@
 package com.agatapietrzycka.ticketreservation.repository;
 
-import com.agatapietrzycka.ticketreservation.model.Plain;
+import com.agatapietrzycka.ticketreservation.model.Plane;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PlainRepository extends JpaRepository<Plain, Long> {
+public interface PlaneRepository extends JpaRepository<Plane, Long> {
 }

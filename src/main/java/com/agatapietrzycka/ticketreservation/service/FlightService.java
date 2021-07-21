@@ -7,12 +7,12 @@ import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.model.Airport;
 import com.agatapietrzycka.ticketreservation.model.Flight;
 import com.agatapietrzycka.ticketreservation.model.FlightInformation;
-import com.agatapietrzycka.ticketreservation.model.Plain;
+import com.agatapietrzycka.ticketreservation.model.Plane;
 import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
 import com.agatapietrzycka.ticketreservation.repository.AirportRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightInformationRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightRepository;
-import com.agatapietrzycka.ticketreservation.repository.PlainRepository;
+import com.agatapietrzycka.ticketreservation.repository.PlaneRepository;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomCreatingFlighttException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class FlightService {
 
     private final FlightRepository flightRepository;
-    private final PlainRepository plainRepository;
+    private final PlaneRepository planeRepository;
     private final AirportRepository airportRepository;
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final FlightInformationRepository flightInformationRepository;
@@ -58,9 +58,9 @@ public class FlightService {
 
     @Transactional(readOnly = true)
     public ResponseDataDto getDataToCreateFlight(){
-        List<Plain> plains = plainRepository.findAll();
+        List<Plane> planes = planeRepository.findAll();
         List<Airport> airports = airportRepository.findAll();
-        return new ResponseDataDto(mapDataToCreateFlight(plains, airports));
+        return new ResponseDataDto(mapDataToCreateFlight(planes, airports));
     }
 
 
@@ -73,10 +73,10 @@ public class FlightService {
         return new ResponseFlightListDto(flightListElements);
     }
 
-    private ResponseDataDto.ListElement mapDataToCreateFlight( List<Plain> plains, List<Airport> airports){
+    private ResponseDataDto.ListElement mapDataToCreateFlight(List<Plane> planes, List<Airport> airports){
         ResponseDataDto.ListElement listElement = new ResponseDataDto.ListElement();
         listElement.setAirportList(airports);
-        listElement.setPlainList(plains);
+        listElement.setPlaneList(planes);
         return listElement;
     }
 
@@ -96,7 +96,7 @@ public class FlightService {
         flight.setArrivalAirport(airportRepository.getById(flightDto.getArrivalAirportId()));
         flight.setDepartureAirport(airportRepository.getById(flightDto.getDepartureAirportId()));
         flight.setPrice(flightDto.getPrice());
-        flight.setPlain(plainRepository.getById(flightDto.getPlainId()));
+        flight.setPlane(planeRepository.getById(flightDto.getPlainId()));
         flight.setArrivalDate(flightDto.getArrivalDate());
         flight.setDepartureDate(flightDto.getDepartureDate());
 

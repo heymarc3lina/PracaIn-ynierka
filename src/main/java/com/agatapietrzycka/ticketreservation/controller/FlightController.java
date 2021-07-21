@@ -4,9 +4,9 @@ import com.agatapietrzycka.ticketreservation.controller.dto.NewFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
-import com.agatapietrzycka.ticketreservation.model.Plain;
+import com.agatapietrzycka.ticketreservation.model.Plane;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
-import com.agatapietrzycka.ticketreservation.service.PlainService;
+import com.agatapietrzycka.ticketreservation.service.PlaneService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,19 +23,19 @@ import java.util.List;
 
 public class FlightController {
 
-   private final PlainService plainService;
+   private final PlaneService planeService;
    private final FlightService flightService;
 
 
     @Autowired
-    public FlightController(PlainService plainService, FlightService flightService) {
-        this.plainService = plainService;
+    public FlightController(PlaneService planeService, FlightService flightService) {
+        this.planeService = planeService;
         this.flightService = flightService;
     }
 
     @GetMapping("/flight")
-    public List<Plain> sayHello() {
-        return plainService.getPlain();
+    public List<Plane> sayHello() {
+        return planeService.getPlain();
     }
 
 
