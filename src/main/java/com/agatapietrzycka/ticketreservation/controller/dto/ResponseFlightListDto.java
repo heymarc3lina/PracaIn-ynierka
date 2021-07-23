@@ -1,5 +1,6 @@
 package com.agatapietrzycka.ticketreservation.controller.dto;
 
+import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ResponseFlightListDto {
     private List<ListElement> flights;
+    private List<String> errorMessage;
 
     @Getter
     @Setter
@@ -22,5 +24,6 @@ public class ResponseFlightListDto {
         private String departureAirports;
         private Instant departureDate;
         private Integer minPrice;
+        private FlightStatus flightStatus;
     }
 }

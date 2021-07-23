@@ -2,7 +2,7 @@ package com.agatapietrzycka.ticketreservation.model.enums;
 
 public enum FlightStatus {
     NEW,
-    SUBBMITTED,
+    AVAILABLE,
     OVERDATE,
     CANCELLED,
     CLOSED;

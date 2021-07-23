@@ -1,5 +1,6 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
+import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.NewFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
@@ -7,11 +8,14 @@ import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.model.Plane;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
 import com.agatapietrzycka.ticketreservation.service.PlaneService;
+import com.agatapietrzycka.ticketreservation.util.exception.CustomFlightException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -65,6 +69,13 @@ public class FlightController {
         return ResponseEntity.status(HttpStatus.OK).body(allFlights);
     }
 
+    //moze to tylko manager lotow
+   @PutMapping
+    public ResponseEntity<ResponseFlightListDto> changeFlightStatus(@RequestBody FlightStatusDto flightStatusDto){
+         ResponseFlightListDto responseFlightListDto = flightService.changeStatus(flightStatusDto);
+
+       return ResponseEntity.status(HttpStatus.OK).body(responseFlightListDto);
+    }
 
 
 }

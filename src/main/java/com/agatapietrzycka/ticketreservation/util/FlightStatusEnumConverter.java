@@ -1,7 +1,7 @@
 package com.agatapietrzycka.ticketreservation.util;
 
 import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
-import com.agatapietrzycka.ticketreservation.util.exception.CustomReservationException;
+import com.agatapietrzycka.ticketreservation.util.exception.CustomFlightException;
 
 import javax.persistence.AttributeConverter;
 
@@ -11,7 +11,7 @@ public Integer convertToDatabaseColumn(FlightStatus attribute){
     switch (attribute) {
         case NEW:
             return 1;
-        case SUBBMITTED:
+        case AVAILABLE:
             return 2;
         case OVERDATE:
             return 3;
@@ -20,7 +20,7 @@ public Integer convertToDatabaseColumn(FlightStatus attribute){
         case CLOSED:
             return 5;
         default:
-            throw new CustomReservationException(attribute + " is not supported!");
+            throw new CustomFlightException(attribute + " is not supported!");
     }
 }
 
@@ -30,7 +30,7 @@ public Integer convertToDatabaseColumn(FlightStatus attribute){
             case 1:
                 return FlightStatus.NEW;
             case 2:
-                return FlightStatus.SUBBMITTED;
+                return FlightStatus.AVAILABLE;
             case 3:
                 return FlightStatus.OVERDATE;
             case 4:
@@ -38,7 +38,7 @@ public Integer convertToDatabaseColumn(FlightStatus attribute){
             case 5:
                 return FlightStatus.CLOSED;
             default:
-                throw new CustomReservationException(dbData + " is not supported!");
+                throw new CustomFlightException(dbData + " is not supported!");
         }
     }
 }
