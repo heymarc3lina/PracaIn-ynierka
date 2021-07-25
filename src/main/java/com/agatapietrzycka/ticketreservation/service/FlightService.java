@@ -65,14 +65,22 @@ public class FlightService {
     }
 
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseFlightListDto getAllFlights() {
         List<Flight> flights = flightRepository.findAll();
+        for (Flight flight : flights) {
+            if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
+                flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
+                flight.getFlightInformation().setUpdatedAt(Instant.now());
+            }
+        }
+
         List<ResponseFlightListDto.ListElement> flightListElements = flights.stream()
                 .map(this::mapToFlightListElement)
                 .collect(Collectors.toList());
         return new ResponseFlightListDto(flightListElements, null);
     }
+
 
     @Transactional
     public ResponseFlightListDto changeStatus(FlightStatusDto flightStatusDto) {
@@ -141,7 +149,7 @@ public class FlightService {
         if (flight.getArrivalAirport().getAirportId() == flight.getDepartureAirport().getAirportId()) {
             errorMessages.add("The same airports are choosen: arrival airport = departure airport.");
         }
-        if (flight.getArrivalDate() == flight.getDepartureDate() || dateValidation(flight.getArrivalDate(), flight.getDepartureDate())) {
+        if (flight.getArrivalDate() == flight.getDepartureDate() || compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
             errorMessages.add("Dates are the same or are overdue.");
         }
 
@@ -150,7 +158,7 @@ public class FlightService {
         return errorMessages;
     }
 
-    private Boolean dateValidation(Instant arrivalDate, Instant departureDate) {
+    private Boolean compareDate(Instant arrivalDate, Instant departureDate) {
         int compareArrival = arrivalDate.compareTo(Instant.now());
         int compareDeparture = departureDate.compareTo(Instant.now());
         if (compareArrival <= 0 || compareDeparture <= 0) {

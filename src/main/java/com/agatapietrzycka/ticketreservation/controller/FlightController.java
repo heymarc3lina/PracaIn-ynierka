@@ -27,8 +27,8 @@ import java.util.List;
 
 public class FlightController {
 
-   private final PlaneService planeService;
-   private final FlightService flightService;
+    private final PlaneService planeService;
+    private final FlightService flightService;
 
 
     @Autowired
@@ -45,7 +45,7 @@ public class FlightController {
 
     @GetMapping("/data")
     //moze to tylko manager lotow
-    public ResponseEntity<ResponseDataDto> getDataToCreateFlight(){
+    public ResponseEntity<ResponseDataDto> getDataToCreateFlight() {
         ResponseDataDto responseDataDto = flightService.getDataToCreateFlight();
         return ResponseEntity.status(HttpStatus.OK).body(responseDataDto);
     }
@@ -64,17 +64,20 @@ public class FlightController {
 
     //wszystkie loty moze widziec tylko manager
     @GetMapping
-    public ResponseEntity<ResponseFlightListDto> getAllFlights(){
+    public ResponseEntity<ResponseFlightListDto> getAllFlights() {
         ResponseFlightListDto allFlights = flightService.getAllFlights();
         return ResponseEntity.status(HttpStatus.OK).body(allFlights);
     }
 
     //moze to tylko manager lotow
-   @PutMapping
-    public ResponseEntity<ResponseFlightListDto> changeFlightStatus(@RequestBody FlightStatusDto flightStatusDto){
-         ResponseFlightListDto responseFlightListDto = flightService.changeStatus(flightStatusDto);
-
-       return ResponseEntity.status(HttpStatus.OK).body(responseFlightListDto);
+    @PutMapping
+    public ResponseEntity<ResponseFlightListDto> changeFlightStatus(@RequestBody FlightStatusDto flightStatusDto) {
+        ResponseFlightListDto responseFlightListDto = flightService.changeStatus(flightStatusDto);
+        HttpStatus status = HttpStatus.OK;
+        if (responseFlightListDto.getErrorMessage().size() > 0) {
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(responseFlightListDto);
     }
 
 
