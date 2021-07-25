@@ -1,5 +1,6 @@
 package com.agatapietrzycka.ticketreservation.service;
 
+import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.NewFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
@@ -69,9 +70,11 @@ public class FlightService {
     public ResponseFlightListDto getAllFlights() {
         List<Flight> flights = flightRepository.findAll();
         for (Flight flight : flights) {
-            if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
-                flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
-                flight.getFlightInformation().setUpdatedAt(Instant.now());
+            if (flight.getFlightInformation().getStatus() != FlightStatus.NEW) {
+                if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
+                    flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
+                    flight.getFlightInformation().setUpdatedAt(Instant.now());
+                }
             }
         }
 
@@ -82,20 +85,23 @@ public class FlightService {
     }
 
     @Transactional
-    public ResponseFlightListDto getAllAvailableFlights() {
+    public AvailableFlightListDto getAllAvailableFlights() {
         List<Flight> flights = flightRepository.findAllFlightsAtStatus();
         for (Flight flight : flights) {
-            if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
-                flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
-                flight.getFlightInformation().setUpdatedAt(Instant.now());
-                flights.remove(flight);
+            if (flight.getFlightInformation().getStatus() != FlightStatus.NEW) {
+                if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
+                    flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
+                    flight.getFlightInformation().setUpdatedAt(Instant.now());
+                    flights.remove(flight);
+                }
             }
         }
-        List<ResponseFlightListDto.ListElement> flightListElements = flights.stream()
-                .map(this::mapToFlightListElement)
+        List<AvailableFlightListDto.ListElement> flightListElements = flights.stream()
+                .map(this::mapToAvailableFlightListElement)
                 .collect(Collectors.toList());
-        return new ResponseFlightListDto(flightListElements, null);
+        return new AvailableFlightListDto(flightListElements, null);
     }
+
 
 
     @Transactional
@@ -128,6 +134,32 @@ public class FlightService {
         return listElement;
     }
 
+    private AvailableFlightListDto.ListElement mapToAvailableFlightListElement(Flight flight) {
+        AvailableFlightListDto.ListElement listElement = new AvailableFlightListDto.ListElement();
+        listElement.setId(flight.getId());
+        listElement.setArrivalAirports(flight.getArrivalAirport().getCity());
+        listElement.setArrivalDate(flight.getArrivalDate());
+        listElement.setDepartureAirports(flight.getDepartureAirport().getCity());
+        listElement.setDepartureDate(flight.getDepartureDate());
+        listElement.setMinPrice(flight.getPrice());
+        return listElement;
+    }
+
+    private List<FlightStatus> getProperStatusList(Flight flight){
+        List<FlightStatus> flightStatuses = null;
+        if(flight.getFlightInformation().getStatus() == FlightStatus.AVAILABLE){
+            flightStatuses = List.of(FlightStatus.OVERDATE, FlightStatus.CANCELLED);
+        }
+        else if(flight.getFlightInformation().getStatus() == FlightStatus.NEW){
+            flightStatuses = List.of(FlightStatus.AVAILABLE, FlightStatus.CANCELLED);
+        }
+        else if(flight.getFlightInformation().getStatus() == FlightStatus.OVERDATE){
+            flightStatuses = List.of( FlightStatus.CANCELLED);
+        }
+
+        return flightStatuses;
+    }
+
     private ResponseFlightListDto.ListElement mapToFlightListElement(Flight flight) {
         ResponseFlightListDto.ListElement listElement = new ResponseFlightListDto.ListElement();
         listElement.setId(flight.getId());
@@ -137,6 +169,7 @@ public class FlightService {
         listElement.setDepartureDate(flight.getDepartureDate());
         listElement.setMinPrice(flight.getPrice());
         listElement.setFlightStatus(flight.getFlightInformation().getStatus());
+        listElement.setFlightStatuses(getProperStatusList(flight));
         return listElement;
     }
 

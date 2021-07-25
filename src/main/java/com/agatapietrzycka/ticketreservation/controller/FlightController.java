@@ -1,5 +1,6 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
+import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.NewFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
@@ -69,8 +70,8 @@ public class FlightController {
 
 
     @GetMapping("/allFlight")
-    public ResponseEntity<ResponseFlightListDto> getAllFlightsWithAvailableStatus() {
-        ResponseFlightListDto allFlights = flightService.getAllAvailableFlights();
+    public ResponseEntity<AvailableFlightListDto> getAllFlightsWithAvailableStatus() {
+        AvailableFlightListDto allFlights = flightService.getAllAvailableFlights();
         return ResponseEntity.status(HttpStatus.OK).body(allFlights);
     }
 
