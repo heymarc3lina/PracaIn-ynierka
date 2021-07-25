@@ -81,6 +81,22 @@ public class FlightService {
         return new ResponseFlightListDto(flightListElements, null);
     }
 
+    @Transactional
+    public ResponseFlightListDto getAllAvailableFlights() {
+        List<Flight> flights = flightRepository.findAllFlightsAtStatus();
+        for (Flight flight : flights) {
+            if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
+                flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
+                flight.getFlightInformation().setUpdatedAt(Instant.now());
+                flights.remove(flight);
+            }
+        }
+        List<ResponseFlightListDto.ListElement> flightListElements = flights.stream()
+                .map(this::mapToFlightListElement)
+                .collect(Collectors.toList());
+        return new ResponseFlightListDto(flightListElements, null);
+    }
+
 
     @Transactional
     public ResponseFlightListDto changeStatus(FlightStatusDto flightStatusDto) {

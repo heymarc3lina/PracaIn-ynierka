@@ -8,11 +8,9 @@ import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.model.Plane;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
 import com.agatapietrzycka.ticketreservation.service.PlaneService;
-import com.agatapietrzycka.ticketreservation.util.exception.CustomFlightException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -66,6 +64,13 @@ public class FlightController {
     @GetMapping
     public ResponseEntity<ResponseFlightListDto> getAllFlights() {
         ResponseFlightListDto allFlights = flightService.getAllFlights();
+        return ResponseEntity.status(HttpStatus.OK).body(allFlights);
+    }
+
+
+    @GetMapping("/allFlight")
+    public ResponseEntity<ResponseFlightListDto> getAllFlightsWithAvailableStatus() {
+        ResponseFlightListDto allFlights = flightService.getAllAvailableFlights();
         return ResponseEntity.status(HttpStatus.OK).body(allFlights);
     }
 
