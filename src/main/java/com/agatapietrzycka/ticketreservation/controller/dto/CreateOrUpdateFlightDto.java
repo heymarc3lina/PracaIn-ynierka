@@ -1,11 +1,10 @@
 package com.agatapietrzycka.ticketreservation.controller.dto;
 
 import lombok.Getter;
-
 import java.time.Instant;
 
 @Getter
-public class NewFlightDto {
+public class CreateOrUpdateFlightDto {
     private Long plainId;
     private Long arrivalAirportId;
     private Long departureAirportId;

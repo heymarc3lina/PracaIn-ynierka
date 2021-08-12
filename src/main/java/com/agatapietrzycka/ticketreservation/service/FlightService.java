@@ -2,7 +2,7 @@ package com.agatapietrzycka.ticketreservation.service;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.NewFlightDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
@@ -40,8 +40,8 @@ public class FlightService {
 
 
     @Transactional
-    public ResponseDto createFlight(NewFlightDto flightDto) {
-        Flight flight = mapToFlightEntity(flightDto);
+    public ResponseDto createFlight(CreateOrUpdateFlightDto flightDto) {
+        Flight flight = mapToFlightEntity(null, flightDto);
         List<String> errorMessage = getErrorMessages(flight);
         ResponseDto responseDto = new ResponseDto(null, errorMessage);
         if (errorMessage.isEmpty()) {
@@ -58,11 +58,29 @@ public class FlightService {
         return responseDto;
     }
 
+    @Transactional
+    public ResponseDto updateFlight(Long flightId, CreateOrUpdateFlightDto flightUpdateDto){
+        Flight flight = flightRepository.findById(flightId).orElseThrow();
+        fillFlight(flight, flightUpdateDto);
+        List<String> errorMessage = getErrorMessages(flight);
+        ResponseDto responseDto = new ResponseDto(null, errorMessage);
+        if(errorMessage.isEmpty()){
+            responseDto.setId(flight.getId());
+        }
+        return responseDto;
+    }
+
     @Transactional(readOnly = true)
     public ResponseDataDto getDataToCreateFlight() {
         List<Plane> planes = planeRepository.findAll();
         List<Airport> airports = airportRepository.findAll();
         return new ResponseDataDto(mapDataToCreateFlight(planes, airports));
+    }
+
+   public ResponseFlightListDto getDataToUpdate(Long flightId){
+        Flight flight = flightRepository.findById(flightId).orElseThrow();
+        ResponseFlightListDto.ListElement flightListElement = mapToFlightListElement(flight);
+        return new ResponseFlightListDto(List.of(flightListElement), null);
     }
 
 
@@ -84,7 +102,7 @@ public class FlightService {
         return new ResponseFlightListDto(flightListElements, null);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public AvailableFlightListDto getAllAvailableFlights() {
         List<Flight> flights = flightRepository.findAllFlightsAtStatus();
         for (Flight flight : flights) {
@@ -173,8 +191,15 @@ public class FlightService {
         return listElement;
     }
 
-    private Flight mapToFlightEntity(NewFlightDto flightDto) {
-        Flight flight = new Flight();
+    private Flight mapToFlightEntity(Flight flight, CreateOrUpdateFlightDto flightDto) {
+        if(flight == null) {
+            flight = new Flight();
+        }
+
+        return fillFlight(flight, flightDto);
+    }
+
+    private Flight fillFlight(Flight flight, CreateOrUpdateFlightDto flightDto){
         flight.setArrivalAirport(airportRepository.getById(flightDto.getArrivalAirportId()));
         flight.setDepartureAirport(airportRepository.getById(flightDto.getDepartureAirportId()));
         flight.setPrice(flightDto.getPrice());
@@ -196,7 +221,7 @@ public class FlightService {
         List<String> errorMessages = new ArrayList<>();
 
         if (flight.getArrivalAirport().getAirportId() == flight.getDepartureAirport().getAirportId()) {
-            errorMessages.add("The same airports are choosen: arrival airport = departure airport.");
+            errorMessages.add("The same airports are chosen: arrival airport = departure airport.");
         }
         if (flight.getArrivalDate() == flight.getDepartureDate() || compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
             errorMessages.add("Dates are the same or are overdue.");

@@ -2,7 +2,7 @@ package com.agatapietrzycka.ticketreservation.controller;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.NewFlightDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,7 +53,7 @@ public class FlightController {
 
     //moze to tylko manager lotow
     @PostMapping
-    public ResponseEntity<ResponseDto> createFlight(@RequestBody NewFlightDto flightDto) {
+    public ResponseEntity<ResponseDto> createFlight(@RequestBody CreateOrUpdateFlightDto flightDto) {
         ResponseDto responseDto = flightService.createFlight(flightDto);
         HttpStatus status = HttpStatus.OK;
         if (responseDto.getErrorMessage().size() > 0) {
@@ -86,5 +87,19 @@ public class FlightController {
         return ResponseEntity.status(status).body(responseFlightListDto);
     }
 
+    @PutMapping("/{flightId}/update")
+    public ResponseEntity<ResponseDto> updateFlight(@PathVariable Long flightId, @RequestBody CreateOrUpdateFlightDto flightUpdateDto){
+        ResponseDto responseDto = flightService.updateFlight(flightId, flightUpdateDto);
+        HttpStatus status = HttpStatus.OK;
+        if (responseDto.getErrorMessage().size() > 0) {
+            status = HttpStatus.BAD_REQUEST;
+        }
+        return ResponseEntity.status(status).body(responseDto);
+    }
 
+    @GetMapping("/{flightId}/update")
+     public ResponseEntity<ResponseFlightListDto>  getDataToUpdateFlight(@PathVariable Long flightId){
+        ResponseFlightListDto responseFlightListDto = flightService.getDataToUpdate(flightId);
+        return ResponseEntity.status(HttpStatus.OK).body(responseFlightListDto);
+     }
 }
