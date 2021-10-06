@@ -1,15 +1,15 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
-import com.agatapietrzycka.ticketreservation.model.Plane;
+import com.agatapietrzycka.ticketreservation.model.Flight;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
-import com.agatapietrzycka.ticketreservation.service.PlaneService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,26 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/ticketreservation/api/flight")
-
+@AllArgsConstructor
 public class FlightController {
 
-    private final PlaneService planeService;
     private final FlightService flightService;
-
-
-    @Autowired
-    public FlightController(PlaneService planeService, FlightService flightService) {
-        this.planeService = planeService;
-        this.flightService = flightService;
-    }
-
-    @GetMapping("/flight")
-    public List<Plane> sayHello() {
-        return planeService.getPlain();
-    }
-
 
     @GetMapping("/data")
     //moze to tylko manager lotow
@@ -87,6 +74,7 @@ public class FlightController {
         return ResponseEntity.status(status).body(responseFlightListDto);
     }
 
+    //moze tylko manager lotow
     @PutMapping("/{flightId}/update")
     public ResponseEntity<ResponseDto> updateFlight(@PathVariable Long flightId, @RequestBody CreateOrUpdateFlightDto flightUpdateDto){
         ResponseDto responseDto = flightService.updateFlight(flightId, flightUpdateDto);
@@ -97,9 +85,16 @@ public class FlightController {
         return ResponseEntity.status(status).body(responseDto);
     }
 
+    //moze tylko manager lotow
     @GetMapping("/{flightId}/update")
-     public ResponseEntity<ResponseFlightListDto>  getDataToUpdateFlight(@PathVariable Long flightId){
+     public ResponseEntity<ResponseFlightListDto> showDataToUpdateFlight(@PathVariable Long flightId){
         ResponseFlightListDto responseFlightListDto = flightService.getDataToUpdate(flightId);
         return ResponseEntity.status(HttpStatus.OK).body(responseFlightListDto);
      }
+
+     @GetMapping("/findFlight")
+     public List<Flight> filterFlight(@RequestBody FilterFlightDto filterFlightDto){
+        return flightService.getFilterFlight(filterFlightDto);
+     }
+
 }

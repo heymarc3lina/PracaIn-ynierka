@@ -1,7 +1,6 @@
 package com.agatapietrzycka.ticketreservation.repository;
 
 import com.agatapietrzycka.ticketreservation.model.Flight;
-import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
