@@ -14,11 +14,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 public class LoginController {
 
     // just here to be able to login in swagger
-    @PostMapping("/shop/api/login")
+    @PostMapping("/ticketreservation/api/login")
     public void login(@RequestBody LoginCredentials loginCredentials){
     }
 
-    @GetMapping("/shop/api/whoami")
+    @GetMapping("/ticketreservation/api/whoami")
     public ResponseEntity<String> getRole(@AuthenticationPrincipal User user){
         Role role = user.getRoles().stream().findFirst().orElseThrow(() -> new CustomUserException("User does not have any role"));
         return ResponseEntity.ok(role.getRole().name());

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,21 +23,21 @@ public class RegistrationController {
     private final UserService userService;
 
     @PostMapping("/user")
-    public ResponseEntity<ResponseDto> createUserAccount(CreateUserDto createUserDto){
+    public ResponseEntity<ResponseDto> createUserAccount(@RequestBody CreateUserDto createUserDto){
         ResponseDto responseDto = userService.createUser(createUserDto, Set.of(RoleType.USER));
         return getResponseWithCorrectStatusCode(responseDto);
     }
 
     @PostMapping("/manager")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseDto> createManagerAccount(CreateUserDto createUserDto){
+    public ResponseEntity<ResponseDto> createManagerAccount(@RequestBody CreateUserDto createUserDto){
         ResponseDto responseDto = userService.createUser(createUserDto, Set.of(RoleType.MANAGER));
         return getResponseWithCorrectStatusCode(responseDto);
     }
 
     @PostMapping("/admin")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseDto> createAdminAccount(CreateUserDto createUserDto){
+    public ResponseEntity<ResponseDto> createAdminAccount(@RequestBody CreateUserDto createUserDto){
         ResponseDto responseDto = userService.createUser(createUserDto, Set.of(RoleType.ADMIN));
         return getResponseWithCorrectStatusCode(responseDto);
     }

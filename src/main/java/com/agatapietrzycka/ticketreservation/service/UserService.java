@@ -9,6 +9,9 @@ import com.agatapietrzycka.ticketreservation.repository.RoleRepository;
 import com.agatapietrzycka.ticketreservation.repository.UserRepository;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomUserException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +21,13 @@ import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -80,5 +84,12 @@ public class UserService {
         Validator validator = validatorFactory.getValidator();
         validator.validate(user).forEach(err -> errorMessages.add(err.getMessage()));
         return errorMessages;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<User> user = userRepository.findByEmail(email);
+        return user
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("Email: %s not found", email)));
     }
 }
