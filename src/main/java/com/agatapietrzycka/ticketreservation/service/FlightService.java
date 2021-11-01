@@ -1,6 +1,7 @@
 package com.agatapietrzycka.ticketreservation.service;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
@@ -105,6 +106,14 @@ public class FlightService {
     @Transactional(readOnly = true)
     public AvailableFlightListDto getAllAvailableFlights() {
         List<Flight> flights = flightRepository.findAllFlightsAtStatus();
+        overdateingFlights(flights);
+        List<AvailableFlightListDto.ListElement> flightListElements = flights.stream()
+                .map(this::mapToAvailableFlightListElement)
+                .collect(Collectors.toList());
+        return new AvailableFlightListDto(flightListElements, null);
+    }
+
+    private void overdateingFlights(List<Flight> flights){
         for (Flight flight : flights) {
             if (flight.getFlightInformation().getStatus() != FlightStatus.NEW) {
                 if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
@@ -114,12 +123,7 @@ public class FlightService {
                 }
             }
         }
-        List<AvailableFlightListDto.ListElement> flightListElements = flights.stream()
-                .map(this::mapToAvailableFlightListElement)
-                .collect(Collectors.toList());
-        return new AvailableFlightListDto(flightListElements, null);
     }
-
 
 
     @Transactional
@@ -239,5 +243,19 @@ public class FlightService {
             return true;
         }
         return false;
+    }
+
+    public  List<Flight> getFilterFlight(FilterFlightDto filterFlightDto) {
+       List<Flight> flightList = flightRepository.findAllFlightsAtStatus();
+       overdateingFlights(flightList);
+       List<Flight> filterFlightList = new ArrayList<>();
+       for(Flight flight : flightList){
+           if(flight.getArrivalAirport().getCity() == filterFlightDto.getArrivalAirports() &&
+           flight.getDepartureAirport().getCity() == filterFlightDto.getDepartureAirports() &&
+                   (flight.getPrice() <= filterFlightDto.getMaxPrice() || flight.getPrice() >= filterFlightDto.getMinPrice())){
+               filterFlightList.add(flight);
+           }
+       }
+       return filterFlightList;
     }
 }
