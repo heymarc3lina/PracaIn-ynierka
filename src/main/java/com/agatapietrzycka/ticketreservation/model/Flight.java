@@ -14,7 +14,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.validation.constraints.NotNull;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -34,10 +34,10 @@ public class Flight {
 //    private Boolean isAvailable;
 
     @NotNull
-    private Instant arrivalDate;
+    private LocalDateTime arrivalDate;
 
     @NotNull
-    private Instant departureDate;
+    private LocalDateTime departureDate;
 
     @ManyToOne
     @JoinColumn(name = "plane_id", nullable = false)

@@ -2,7 +2,9 @@ package com.agatapietrzycka.ticketreservation.model;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,17 +12,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
-import java.util.List;
 
 @Entity
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Reservation {
 
     @Id

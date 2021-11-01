@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -19,9 +19,9 @@ public class AvailableFlightListDto {
     public static final class ListElement {
         private Long id;
         private String arrivalAirports;
-        private Instant arrivalDate;
+        private LocalDateTime arrivalDate;
         private String departureAirports;
-        private Instant departureDate;
+        private LocalDateTime departureDate;
         private Integer minPrice;
     }
 }

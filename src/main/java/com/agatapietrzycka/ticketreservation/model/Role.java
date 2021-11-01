@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Role {
     @Id
     @SequenceGenerator(

@@ -15,6 +15,7 @@ public class StatusEnumConverter implements AttributeConverter<ReservationStatus
             case CANCELED:
                 return 2;
             case WAITING:
+                return 3;
             default:
                 throw new CustomReservationException(attribute + " is not supported!");
         }

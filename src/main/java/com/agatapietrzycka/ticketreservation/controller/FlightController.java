@@ -1,17 +1,18 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.model.Flight;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,15 +32,14 @@ public class FlightController {
     private final FlightService flightService;
 
     @GetMapping("/data")
-    //moze to tylko manager lotow
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<ResponseDataDto> getDataToCreateFlight() {
         ResponseDataDto responseDataDto = flightService.getDataToCreateFlight();
         return ResponseEntity.status(HttpStatus.OK).body(responseDataDto);
     }
 
-
-    //moze to tylko manager lotow
     @PostMapping
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<ResponseDto> createFlight(@RequestBody CreateOrUpdateFlightDto flightDto) {
         ResponseDto responseDto = flightService.createFlight(flightDto);
         HttpStatus status = HttpStatus.OK;
@@ -49,8 +49,8 @@ public class FlightController {
         return ResponseEntity.status(status).body(responseDto);
     }
 
-    //wszystkie loty moze widziec tylko manager
     @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<ResponseFlightListDto> getAllFlights() {
         ResponseFlightListDto allFlights = flightService.getAllFlights();
         return ResponseEntity.status(HttpStatus.OK).body(allFlights);
@@ -63,8 +63,8 @@ public class FlightController {
         return ResponseEntity.status(HttpStatus.OK).body(allFlights);
     }
 
-    //moze to tylko manager lotow
     @PutMapping
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<ResponseFlightListDto> changeFlightStatus(@RequestBody FlightStatusDto flightStatusDto) {
         ResponseFlightListDto responseFlightListDto = flightService.changeStatus(flightStatusDto);
         HttpStatus status = HttpStatus.OK;
@@ -74,8 +74,8 @@ public class FlightController {
         return ResponseEntity.status(status).body(responseFlightListDto);
     }
 
-    //moze tylko manager lotow
     @PutMapping("/{flightId}/update")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<ResponseDto> updateFlight(@PathVariable Long flightId, @RequestBody CreateOrUpdateFlightDto flightUpdateDto){
         ResponseDto responseDto = flightService.updateFlight(flightId, flightUpdateDto);
         HttpStatus status = HttpStatus.OK;
@@ -85,8 +85,8 @@ public class FlightController {
         return ResponseEntity.status(status).body(responseDto);
     }
 
-    //moze tylko manager lotow
     @GetMapping("/{flightId}/update")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
      public ResponseEntity<ResponseFlightListDto> showDataToUpdateFlight(@PathVariable Long flightId){
         ResponseFlightListDto responseFlightListDto = flightService.getDataToUpdate(flightId);
         return ResponseEntity.status(HttpStatus.OK).body(responseFlightListDto);

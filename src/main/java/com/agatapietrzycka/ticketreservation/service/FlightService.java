@@ -1,12 +1,12 @@
 package com.agatapietrzycka.ticketreservation.service;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.model.Airport;
 import com.agatapietrzycka.ticketreservation.model.Flight;
 import com.agatapietrzycka.ticketreservation.model.FlightInformation;
@@ -25,6 +25,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -236,26 +237,26 @@ public class FlightService {
         return errorMessages;
     }
 
-    private Boolean compareDate(Instant arrivalDate, Instant departureDate) {
-        int compareArrival = arrivalDate.compareTo(Instant.now());
-        int compareDeparture = departureDate.compareTo(Instant.now());
+    private Boolean compareDate(LocalDateTime arrivalDate, LocalDateTime departureDate) {
+        int compareArrival = arrivalDate.compareTo(LocalDateTime.now());
+        int compareDeparture = departureDate.compareTo(LocalDateTime.now());
         if (compareArrival <= 0 || compareDeparture <= 0) {
             return true;
         }
         return false;
     }
 
-    public  List<Flight> getFilterFlight(FilterFlightDto filterFlightDto) {
-       List<Flight> flightList = flightRepository.findAllFlightsAtStatus();
-       overdateingFlights(flightList);
-       List<Flight> filterFlightList = new ArrayList<>();
-       for(Flight flight : flightList){
-           if(flight.getArrivalAirport().getCity() == filterFlightDto.getArrivalAirports() &&
-           flight.getDepartureAirport().getCity() == filterFlightDto.getDepartureAirports() &&
-                   (flight.getPrice() <= filterFlightDto.getMaxPrice() || flight.getPrice() >= filterFlightDto.getMinPrice())){
-               filterFlightList.add(flight);
-           }
-       }
-       return filterFlightList;
+    public List<Flight> getFilterFlight(FilterFlightDto filterFlightDto) {
+        List<Flight> flightList = flightRepository.findAllFlightsAtStatus();
+        overdateingFlights(flightList);
+        List<Flight> filterFlightList = new ArrayList<>();
+        for (Flight flight : flightList) {
+            if (flight.getArrivalAirport().getCity() == filterFlightDto.getArrivalAirports() &&
+                    flight.getDepartureAirport().getCity() == filterFlightDto.getDepartureAirports() &&
+                    (flight.getPrice() <= filterFlightDto.getMaxPrice() || flight.getPrice() >= filterFlightDto.getMinPrice())) {
+                filterFlightList.add(flight);
+            }
+        }
+        return filterFlightList;
     }
 }

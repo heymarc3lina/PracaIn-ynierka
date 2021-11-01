@@ -1,17 +1,17 @@
 package com.agatapietrzycka.ticketreservation.controller.dto;
 
 import lombok.Getter;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 
 @Getter
 public class CreateOrUpdateFlightDto {
     private Long plainId;
     private Long arrivalAirportId;
     private Long departureAirportId;
-    private Instant arrivalDate;
-    private Instant departureDate;
+    private LocalDateTime arrivalDate;
+    private LocalDateTime departureDate;
     private Integer price;
-
 
 
 }
