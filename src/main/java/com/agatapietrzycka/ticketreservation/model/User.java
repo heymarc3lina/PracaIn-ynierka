@@ -19,6 +19,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.Collection;
@@ -41,21 +42,16 @@ public class User implements UserDetails {
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     private Long userId;
-
     @NotBlank
     private String password;
-
     @NotBlank
     private String name;
-
     @NotBlank
     private String surname;
-
     @Column(nullable = false, unique = true)
+    @Email(message = "Email address must be of correct format!")
     private String email;
-
     private boolean isActive;
-
     private Instant createdDate;
 
     @ManyToMany(fetch = FetchType.EAGER)

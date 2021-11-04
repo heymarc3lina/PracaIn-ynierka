@@ -29,31 +29,23 @@ public class Flight {
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "flight_seq")
     private Long id;
-
 //    @NotNull
 //    private Boolean isAvailable;
-
     @NotNull
     private LocalDateTime arrivalDate;
-
     @NotNull
     private LocalDateTime departureDate;
-
     @ManyToOne
     @JoinColumn(name = "plane_id", nullable = false)
     private Plane Plane;
-
     @ManyToOne
     @JoinColumn(name = "arrivalAirport_id", nullable = false)
     private Airport arrivalAirport;
-
     @ManyToOne
     @JoinColumn(name = "departureAirport_id", nullable = false)
     private Airport departureAirport;
-
     @NotNull
     private Integer price;
-
     @OneToOne
     @JoinColumn(name = "status_id")
     private FlightInformation flightInformation;

@@ -14,7 +14,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
 @EqualsAndHashCode
@@ -37,7 +37,7 @@ public class Reservation {
     @JoinColumn(name = "flight_id", nullable = false)
     private Flight flight;
 
-    private Instant reservationDate;
+    private LocalDateTime reservationDate;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

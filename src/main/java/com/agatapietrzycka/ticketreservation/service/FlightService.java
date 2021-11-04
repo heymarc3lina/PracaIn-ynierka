@@ -1,12 +1,13 @@
 package com.agatapietrzycka.ticketreservation.service;
 
-import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.AirportAndPlaneDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.FlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDataDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.UpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.model.Airport;
 import com.agatapietrzycka.ticketreservation.model.Flight;
 import com.agatapietrzycka.ticketreservation.model.FlightInformation;
@@ -42,52 +43,46 @@ public class FlightService {
 
 
     @Transactional
-    public ResponseDto createFlight(CreateOrUpdateFlightDto flightDto) {
-        Flight flight = mapToFlightEntity(null, flightDto);
-        List<String> errorMessage = getErrorMessages(flight);
-        ResponseDto responseDto = new ResponseDto(null, errorMessage);
-        if (errorMessage.isEmpty()) {
-            FlightInformation flightInformation = new FlightInformation();
-            flightInformation.setFlight(flight);
-            flightInformation.setStatus(FlightStatus.NEW);
-            flightInformation.setUpdatedAt(Instant.now());
-            flight.setFlightInformation(flightInformation);
-            flightInformationRepository.save(flightInformation);
-            Flight flightManagedEntity = flightRepository.save(flight);
-            responseDto.setId(flightManagedEntity.getId());
-
-        }
-        return responseDto;
+    public FlightDto createFlight(CreateOrUpdateFlightDto createOrUpdateFlightDto) {
+        Flight flight = mapToFlightEntity(null, createOrUpdateFlightDto);
+        validateFlight(flight);
+        FlightDto flightDto = new FlightDto();
+        FlightInformation flightInformation = new FlightInformation();
+        flightInformation.setFlight(flight);
+        flightInformation.setStatus(FlightStatus.NEW);
+        flightInformation.setUpdatedAt(Instant.now());
+        flight.setFlightInformation(flightInformation);
+        flightInformationRepository.save(flightInformation);
+        Flight flightManagedEntity = flightRepository.save(flight);
+        flightDto.setId(flightManagedEntity.getId());
+        return flightDto;
     }
 
     @Transactional
-    public ResponseDto updateFlight(Long flightId, CreateOrUpdateFlightDto flightUpdateDto){
+    public FlightDto updateFlight(Long flightId, CreateOrUpdateFlightDto flightUpdateDto) {
         Flight flight = flightRepository.findById(flightId).orElseThrow();
         fillFlight(flight, flightUpdateDto);
-        List<String> errorMessage = getErrorMessages(flight);
-        ResponseDto responseDto = new ResponseDto(null, errorMessage);
-        if(errorMessage.isEmpty()){
-            responseDto.setId(flight.getId());
-        }
-        return responseDto;
+        validateFlight(flight);
+        return mapToFlightDto(flight);
     }
 
     @Transactional(readOnly = true)
-    public ResponseDataDto getDataToCreateFlight() {
+    public AirportAndPlaneDto getDataToCreateFlight() {
         List<Plane> planes = planeRepository.findAll();
         List<Airport> airports = airportRepository.findAll();
-        return new ResponseDataDto(mapDataToCreateFlight(planes, airports));
+        return new AirportAndPlaneDto(airports, planes);
     }
 
-   public ResponseFlightListDto getDataToUpdate(Long flightId){
+    public UpdateFlightDto getDataToUpdate(Long flightId) {
         Flight flight = flightRepository.findById(flightId).orElseThrow();
-        ResponseFlightListDto.ListElement flightListElement = mapToFlightListElement(flight);
-        return new ResponseFlightListDto(List.of(flightListElement), null);
+        FlightDto flightDto = mapToFlightDto(flight);
+        AirportAndPlaneDto airportAndPlaneDto = new AirportAndPlaneDto(airportRepository.findAll(), planeRepository.findAll());
+        return new UpdateFlightDto(flightDto, airportAndPlaneDto);
     }
 
 
     @Transactional
-    public ResponseFlightListDto getAllFlights() {
+    public List<FlightDto> getAllFlights() {
         List<Flight> flights = flightRepository.findAll();
         for (Flight flight : flights) {
             if (flight.getFlightInformation().getStatus() != FlightStatus.NEW) {
@@ -97,21 +92,18 @@ public class FlightService {
                 }
             }
         }
-
-        List<ResponseFlightListDto.ListElement> flightListElements = flights.stream()
-                .map(this::mapToFlightListElement)
+        return flights.stream()
+                .map(this::mapToFlightDto)
                 .collect(Collectors.toList());
-        return new ResponseFlightListDto(flightListElements, null);
     }
 
     @Transactional(readOnly = true)
-    public AvailableFlightListDto getAllAvailableFlights() {
+    public List<AvailableFlightDto> getAllAvailableFlights() {
         List<Flight> flights = flightRepository.findAllFlightsAtStatus();
         overdateingFlights(flights);
-        List<AvailableFlightListDto.ListElement> flightListElements = flights.stream()
+        return flights.stream()
                 .map(this::mapToAvailableFlightListElement)
                 .collect(Collectors.toList());
-        return new AvailableFlightListDto(flightListElements, null);
     }
 
     private void overdateingFlights(List<Flight> flights){
@@ -132,72 +124,62 @@ public class FlightService {
         Flight flight = flightRepository.findById(flightStatusDto.getFlightId()).orElseThrow(() -> new CustomFlightException("Flight does not exist!"));
 
         FlightInformation flightInformation = flight.getFlightInformation();
-        List<String> errorMessage = getErrorMessages(flightInformation);
+        List<String> errorMessage = validateFlight(flightInformation);
         if (errorMessage.isEmpty()) {
             if (flightStatusDto.getFlightStatus() == FlightStatus.NEW) {
-                errorMessage.add("You can't set " + flightStatusDto.getFlightStatus() + ". It has already another status.");
+                throw new CustomFlightException("You can't set " + flightStatusDto.getFlightStatus() + " status. It has already another status: . " + flightInformation.getStatus());
             } else {
                 flightInformation.setStatus(flightStatusDto.getFlightStatus());
                 flightInformation.setUpdatedAt(Instant.now());
             }
         }
-
-        List<ResponseFlightListDto.ListElement> flightListElements = flightRepository.findAll().stream()
-                .map(this::mapToFlightListElement)
+        List<FlightDto> flightListElements = flightRepository.findAll().stream()
+                .map(this::mapToFlightDto)
                 .collect(Collectors.toList());
 
         return new ResponseFlightListDto(flightListElements, errorMessage);
 
     }
 
-    private ResponseDataDto.ListElement mapDataToCreateFlight(List<Plane> planes, List<Airport> airports) {
-        ResponseDataDto.ListElement listElement = new ResponseDataDto.ListElement();
-        listElement.setAirportList(airports);
-        listElement.setPlaneList(planes);
-        return listElement;
+    private AvailableFlightDto mapToAvailableFlightListElement(Flight flight) {
+        AvailableFlightDto availableFlightDto = new AvailableFlightDto();
+        availableFlightDto.setId(flight.getId());
+        availableFlightDto.setArrivalAirports(flight.getArrivalAirport().getCity());
+        availableFlightDto.setArrivalDate(flight.getArrivalDate());
+        availableFlightDto.setDepartureAirports(flight.getDepartureAirport().getCity());
+        availableFlightDto.setDepartureDate(flight.getDepartureDate());
+        availableFlightDto.setMinPrice(flight.getPrice());
+        return availableFlightDto;
     }
 
-    private AvailableFlightListDto.ListElement mapToAvailableFlightListElement(Flight flight) {
-        AvailableFlightListDto.ListElement listElement = new AvailableFlightListDto.ListElement();
-        listElement.setId(flight.getId());
-        listElement.setArrivalAirports(flight.getArrivalAirport().getCity());
-        listElement.setArrivalDate(flight.getArrivalDate());
-        listElement.setDepartureAirports(flight.getDepartureAirport().getCity());
-        listElement.setDepartureDate(flight.getDepartureDate());
-        listElement.setMinPrice(flight.getPrice());
-        return listElement;
-    }
-
-    private List<FlightStatus> getProperStatusList(Flight flight){
+    private List<FlightStatus> getProperStatusList(Flight flight) {
         List<FlightStatus> flightStatuses = null;
-        if(flight.getFlightInformation().getStatus() == FlightStatus.AVAILABLE){
+        if (flight.getFlightInformation().getStatus() == FlightStatus.AVAILABLE) {
             flightStatuses = List.of(FlightStatus.OVERDATE, FlightStatus.CANCELLED);
-        }
-        else if(flight.getFlightInformation().getStatus() == FlightStatus.NEW){
+        } else if (flight.getFlightInformation().getStatus() == FlightStatus.NEW) {
             flightStatuses = List.of(FlightStatus.AVAILABLE, FlightStatus.CANCELLED);
-        }
-        else if(flight.getFlightInformation().getStatus() == FlightStatus.OVERDATE){
-            flightStatuses = List.of( FlightStatus.CANCELLED);
+        } else if (flight.getFlightInformation().getStatus() == FlightStatus.OVERDATE) {
+            flightStatuses = List.of(FlightStatus.CANCELLED);
         }
 
         return flightStatuses;
     }
 
-    private ResponseFlightListDto.ListElement mapToFlightListElement(Flight flight) {
-        ResponseFlightListDto.ListElement listElement = new ResponseFlightListDto.ListElement();
-        listElement.setId(flight.getId());
-        listElement.setArrivalAirports(flight.getArrivalAirport().getCity());
-        listElement.setArrivalDate(flight.getArrivalDate());
-        listElement.setDepartureAirports(flight.getDepartureAirport().getCity());
-        listElement.setDepartureDate(flight.getDepartureDate());
-        listElement.setMinPrice(flight.getPrice());
-        listElement.setFlightStatus(flight.getFlightInformation().getStatus());
-        listElement.setFlightStatuses(getProperStatusList(flight));
-        return listElement;
+    private FlightDto mapToFlightDto(Flight flight) {
+        FlightDto flightDto = new FlightDto();
+        flightDto.setId(flight.getId());
+        flightDto.setArrivalAirports(flight.getArrivalAirport().getCity());
+        flightDto.setArrivalDate(flight.getArrivalDate());
+        flightDto.setDepartureAirports(flight.getDepartureAirport().getCity());
+        flightDto.setDepartureDate(flight.getDepartureDate());
+        flightDto.setMinPrice(flight.getPrice());
+        flightDto.setFlightStatus(flight.getFlightInformation().getStatus());
+        flightDto.setFlightStatuses(getProperStatusList(flight));
+        return flightDto;
     }
 
     private Flight mapToFlightEntity(Flight flight, CreateOrUpdateFlightDto flightDto) {
-        if(flight == null) {
+        if (flight == null) {
             flight = new Flight();
         }
 
@@ -215,26 +197,24 @@ public class FlightService {
         return flight;
     }
 
-    private List<String> getErrorMessages(FlightInformation flightInformation) {
+    private List<String> validateFlight(FlightInformation flightInformation) {
         List<String> errorMessages = new ArrayList<>();
         Validator validator = validatorFactory.getValidator();
         validator.validate(flightInformation).forEach(err -> errorMessages.add(err.getMessage()));
         return errorMessages;
     }
 
-    private List<String> getErrorMessages(Flight flight) {
-        List<String> errorMessages = new ArrayList<>();
+    private void validateFlight(Flight flight) {
 
         if (flight.getArrivalAirport().getAirportId() == flight.getDepartureAirport().getAirportId()) {
-            errorMessages.add("The same airports are chosen: arrival airport = departure airport.");
+            throw new CustomFlightException("The same airports are chosen: arrival airport = departure airport.");
         }
         if (flight.getArrivalDate() == flight.getDepartureDate() || compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
-            errorMessages.add("Dates are the same or are overdue.");
+            throw new CustomFlightException("Dates are the same or are overdue.");
         }
 
         Validator validator = validatorFactory.getValidator();
-        validator.validate(flight).forEach(err -> errorMessages.add(err.getMessage()));
-        return errorMessages;
+        validator.validate(flight);
     }
 
     private Boolean compareDate(LocalDateTime arrivalDate, LocalDateTime departureDate) {

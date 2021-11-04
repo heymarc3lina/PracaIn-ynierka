@@ -1,17 +1,23 @@
 package com.agatapietrzycka.ticketreservation.controller.dto;
 
+import com.agatapietrzycka.ticketreservation.model.enums.ReservationStatus;
+import com.agatapietrzycka.ticketreservation.validation.ApplicationConstants;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@Setter
 public class ReservationDto {
-    Long flightId;
-    List<SeatList> seatList;
-
-    @Getter
-    public static final class SeatList {
-        Long seatId;
-    }
-
+    @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
+    LocalDateTime reservationDate;
+    String planeName;
+    String arrivalAirport;
+    String departureAirport;
+    Integer seatNumber;
+    ReservationStatus reservationStatus;
+    List<ReservationStatus> reservationStatuses;
 }

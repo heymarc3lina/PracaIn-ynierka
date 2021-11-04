@@ -6,11 +6,11 @@ import com.agatapietrzycka.ticketreservation.model.enums.RoleType;
 import com.agatapietrzycka.ticketreservation.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
@@ -23,31 +23,23 @@ public class RegistrationController {
     private final UserService userService;
 
     @PostMapping("/user")
-    public ResponseEntity<ResponseDto> createUserAccount(@RequestBody CreateUserDto createUserDto){
-        ResponseDto responseDto = userService.createUser(createUserDto, Set.of(RoleType.USER));
-        return getResponseWithCorrectStatusCode(responseDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseDto createUserAccount(@RequestBody CreateUserDto createUserDto) {
+        return userService.createUser(createUserDto, Set.of(RoleType.USER));
     }
 
     @PostMapping("/manager")
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseDto> createManagerAccount(@RequestBody CreateUserDto createUserDto){
-        ResponseDto responseDto = userService.createUser(createUserDto, Set.of(RoleType.MANAGER));
-        return getResponseWithCorrectStatusCode(responseDto);
+    public ResponseDto createManagerAccount(@RequestBody CreateUserDto createUserDto) {
+        return userService.createUser(createUserDto, Set.of(RoleType.MANAGER));
     }
 
     @PostMapping("/admin")
+    @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ResponseDto> createAdminAccount(@RequestBody CreateUserDto createUserDto){
-        ResponseDto responseDto = userService.createUser(createUserDto, Set.of(RoleType.ADMIN));
-        return getResponseWithCorrectStatusCode(responseDto);
+    public ResponseDto createAdminAccount(@RequestBody CreateUserDto createUserDto) {
+        return userService.createUser(createUserDto, Set.of(RoleType.ADMIN));
     }
 
-
-    private ResponseEntity<ResponseDto> getResponseWithCorrectStatusCode(ResponseDto responseDto) {
-        HttpStatus status = HttpStatus.CREATED;
-        if(!responseDto.getErrorMessage().isEmpty()){
-            status = HttpStatus.BAD_REQUEST;
-        }
-        return ResponseEntity.status(status).body(responseDto);
-    }
 }

@@ -11,15 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ResponseDataDto {
-    private ResponseDataDto.ListElement data;
-
-    @Getter
-    @Setter
-    public static final class ListElement {
-        List<Airport> airportList;
-        List<Plane> planeList;
-    }
-
-
+public class AirportAndPlaneDto {
+    List<Airport> airportList;
+    List<Plane> planeList;
 }
