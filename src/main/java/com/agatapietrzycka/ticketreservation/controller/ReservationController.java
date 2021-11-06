@@ -4,6 +4,7 @@ package com.agatapietrzycka.ticketreservation.controller;
 import com.agatapietrzycka.ticketreservation.controller.dto.AllReservationDataDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateReservationDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.DataToReservationDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ReservationDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.SummaryCreatedReservationDto;
 import com.agatapietrzycka.ticketreservation.model.User;
 import com.agatapietrzycka.ticketreservation.service.ReservationService;
@@ -44,10 +45,17 @@ public class ReservationController {
 
     }
 
-    @PostMapping("/allReservationForUsers")
+    @GetMapping("/allReservationForUsers")
     @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public List<AllReservationDataDto> getAllReservationForUsers() {
         return reservationService.getAllReservationForUsers();
+    }
+
+    @GetMapping("/allMyReservation")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public List<ReservationDto> getAllUserReservation(@AuthenticationPrincipal User user) {
+        return reservationService.getAllUserReservation(user.getEmail());
     }
 }

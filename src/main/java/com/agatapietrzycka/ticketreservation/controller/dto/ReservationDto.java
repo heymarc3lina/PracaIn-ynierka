@@ -16,7 +16,11 @@ public class ReservationDto {
     LocalDateTime reservationDate;
     String planeName;
     String arrivalAirport;
+    @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
+    LocalDateTime arrivalDate;
     String departureAirport;
+    @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
+    LocalDateTime departureDate;
     Integer seatNumber;
     ReservationStatus reservationStatus;
     List<ReservationStatus> reservationStatuses;

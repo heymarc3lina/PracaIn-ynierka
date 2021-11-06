@@ -114,17 +114,9 @@ public class ReservationService {
         List<Reservation> reservation = reservationRepository.findAll();
         List<AllReservationDataDto> allReservationDataDtos = new ArrayList<>();
         reservation.forEach(e -> {
-            ReservationDto reservationDto = new ReservationDto();
             AllReservationDataDto allReservationDataDto = new AllReservationDataDto();
-            Flight flight = e.getFlight();
-            reservationDto.setArrivalAirport(flight.getArrivalAirport().getCity());
-            reservationDto.setDepartureAirport(flight.getDepartureAirport().getCity());
-            reservationDto.setPlaneName(flight.getPlane().getName());
-            reservationDto.setReservationDate(e.getReservationDate());
-            reservationDto.setSeatNumber(e.getSeat().getSeatNumber());
-            reservationDto.setReservationStatus(e.getReservationInformation().getReservationStatus());
+            ReservationDto reservationDto = prepareReservationDto(e);
 
-            reservationDto.setReservationStatuses(getProperStatusList(e));
             User user = e.getUser();
             allReservationDataDto.setUserEmail(user.getEmail());
             allReservationDataDto.setUserName(user.getName());
@@ -136,6 +128,22 @@ public class ReservationService {
         return allReservationDataDtos;
     }
 
+    private ReservationDto prepareReservationDto(Reservation reservation) {
+
+        ReservationDto reservationDto = new ReservationDto();
+        Flight flight = reservation.getFlight();
+        reservationDto.setArrivalAirport(flight.getArrivalAirport().getCity());
+        reservationDto.setDepartureAirport(flight.getDepartureAirport().getCity());
+        reservationDto.setPlaneName(flight.getPlane().getName());
+        reservationDto.setReservationDate(reservation.getReservationDate());
+        reservationDto.setSeatNumber(reservation.getSeat().getSeatNumber());
+        reservationDto.setReservationStatus(reservation.getReservationInformation().getReservationStatus());
+        reservationDto.setArrivalDate(flight.getArrivalDate());
+        reservationDto.setDepartureDate(flight.getDepartureDate());
+        reservationDto.setReservationStatuses(getProperStatusList(reservation));
+        return reservationDto;
+    }
+
     private List<ReservationStatus> getProperStatusList(Reservation reservation) {
         List<ReservationStatus> reservationStatuses = null;
         if (reservation.getReservationInformation().getReservationStatus() == ReservationStatus.WAITING) {
@@ -143,8 +151,20 @@ public class ReservationService {
         } else if (reservation.getReservationInformation().getReservationStatus() == ReservationStatus.SUBMITTED) {
             reservationStatuses = List.of(ReservationStatus.CANCELED);
         }
-
-
         return reservationStatuses;
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationDto> getAllUserReservation(String userEmail) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new CustomReservationException("User does not exist"));
+
+        List<Reservation> reservations = reservationRepository.findAllByUserId(user.getUserId());
+        List<ReservationDto> reservationDtos = new ArrayList<>();
+        reservations.forEach(reservation -> {
+            if (reservation.getReservationInformation().getReservationStatus() != ReservationStatus.CANCELED) {
+                reservationDtos.add(prepareReservationDto(reservation));
+            }
+        });
+        return reservationDtos;
     }
 }
