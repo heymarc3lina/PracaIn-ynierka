@@ -24,7 +24,7 @@ public class RegistrationController {
 
     @PostMapping("/user")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseDto createUserAccount(@RequestBody CreateUserDto createUserDto) {
+    public ResponseDto createUserAccount(@RequestBody final CreateUserDto createUserDto) {
         return userService.createUser(createUserDto, Set.of(RoleType.USER));
     }
 

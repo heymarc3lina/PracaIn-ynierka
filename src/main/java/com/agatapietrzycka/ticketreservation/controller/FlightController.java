@@ -1,11 +1,11 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AirportAndPlaneDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.FlightWithFlightStatusesDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.UpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.model.Flight;
@@ -42,21 +42,21 @@ public class FlightController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public FlightDto createFlight(@RequestBody CreateOrUpdateFlightDto flightDto) {
+    public FlightWithFlightStatusesDto createFlight(@RequestBody CreateOrUpdateFlightDto flightDto) {
         return flightService.createFlight(flightDto);
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     @ResponseStatus(HttpStatus.OK)
-    public List<FlightDto> getAllFlights() {
+    public List<FlightWithFlightStatusesDto> getAllFlights() {
         return flightService.getAllFlights();
     }
 
     @GetMapping("/allFlight")
     @ResponseStatus(HttpStatus.OK)
-    public List<AvailableFlightDto> getAllFlightsWithAvailableStatus() {
-        return flightService.getAllAvailableFlights();
+    public List<FlightDto> getAllFlightsWithAvailableOrFullStatus() {
+        return flightService.getAllAvailableOrFullFlights();
     }
 
     @PutMapping
@@ -69,7 +69,7 @@ public class FlightController {
     @PutMapping("/{flightId}/update")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     @ResponseStatus(HttpStatus.OK)
-    public FlightDto updateFlight(@PathVariable Long flightId, @RequestBody CreateOrUpdateFlightDto flightUpdateDto) {
+    public FlightWithFlightStatusesDto updateFlight(@PathVariable Long flightId, @RequestBody CreateOrUpdateFlightDto flightUpdateDto) {
         return flightService.updateFlight(flightId, flightUpdateDto);
     }
 

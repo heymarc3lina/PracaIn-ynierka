@@ -5,6 +5,7 @@ import com.agatapietrzycka.ticketreservation.controller.dto.AllReservationDataDt
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateReservationDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.DataToReservationDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ReservationDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.SummaryCreatedReservationDto;
 import com.agatapietrzycka.ticketreservation.model.User;
 import com.agatapietrzycka.ticketreservation.service.ReservationService;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -48,8 +50,8 @@ public class ReservationController {
     @GetMapping("/allReservationForUsers")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
-    public List<AllReservationDataDto> getAllReservationForUsers() {
-        return reservationService.getAllReservationForUsers();
+    public List<AllReservationDataDto> getAllReservations() {
+        return reservationService.getAllReservations();
     }
 
     @GetMapping("/allMyReservation")
@@ -57,5 +59,12 @@ public class ReservationController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public List<ReservationDto> getAllUserReservation(@AuthenticationPrincipal User user) {
         return reservationService.getAllUserReservation(user.getEmail());
+    }
+
+    @PutMapping("/editStatus")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_MANAGER')")
+    public ResponseDto cancelReservation(@RequestBody Long reservationId) {
+        return reservationService.cancelReservation(reservationId);
     }
 }

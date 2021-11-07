@@ -5,6 +5,7 @@ import com.agatapietrzycka.ticketreservation.controller.dto.CreateReservationDto
 import com.agatapietrzycka.ticketreservation.controller.dto.CreatedReservationDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.DataToReservationDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ReservationDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.SeatDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.SummaryCreatedReservationDto;
 import com.agatapietrzycka.ticketreservation.model.Flight;
@@ -12,6 +13,7 @@ import com.agatapietrzycka.ticketreservation.model.Reservation;
 import com.agatapietrzycka.ticketreservation.model.ReservationInformation;
 import com.agatapietrzycka.ticketreservation.model.Seat;
 import com.agatapietrzycka.ticketreservation.model.User;
+import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
 import com.agatapietrzycka.ticketreservation.model.enums.ReservationStatus;
 import com.agatapietrzycka.ticketreservation.repository.FlightRepository;
 import com.agatapietrzycka.ticketreservation.repository.ReservationInformationRepository;
@@ -20,11 +22,13 @@ import com.agatapietrzycka.ticketreservation.repository.SeatRepository;
 import com.agatapietrzycka.ticketreservation.repository.UserRepository;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomFlightException;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomReservationException;
-import com.agatapietrzycka.ticketreservation.util.exception.CustomUserException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,6 +43,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final UserRepository userRepository;
     private final ReservationInformationRepository reservationInformationRepository;
+    private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
     @Transactional(readOnly = true)
     public DataToReservationDto prepareDataToReservation(Long flightId) {
@@ -58,41 +63,6 @@ public class ReservationService {
 
     }
 
-    @Transactional(rollbackFor = CustomReservationException.class)
-    public SummaryCreatedReservationDto createReservation(CreateReservationDto createReservationDto, String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new CustomReservationException("User does not exist"));
-        Flight flight = flightRepository.findById(createReservationDto.getFlightId()).orElseThrow(() -> new CustomFlightException("Flight does not exist"));
-        LocalDateTime reservationDate = LocalDateTime.now();
-        List<Seat> seats = seatRepository.findAllById(createReservationDto.getSeatList());
-        SummaryCreatedReservationDto summaryCreatedReservationDto = new SummaryCreatedReservationDto();
-        List<CreatedReservationDto> createdReservationDtos = new ArrayList<>();
-        for (Seat seat : seats) {
-            Reservation reservation = new Reservation();
-            reservation.setUser(user);
-            reservation.setFlight(flight);
-            reservation.setSeat(seat);
-            reservation.setReservationDate(reservationDate);
-            ReservationInformation reservationInformation = new ReservationInformation();
-            reservationInformation.setReservationStatus(ReservationStatus.WAITING);
-            reservationInformation.setUpdatedAt(Instant.now());
-            reservationInformation.setReservation(reservation);
-            reservationInformationRepository.save(reservationInformation);
-            reservation.setReservationInformation(reservationInformation);
-            Reservation savedReservation = reservationRepository.save(reservation);
-            CreatedReservationDto createdReservationDto = new CreatedReservationDto();
-            createdReservationDto.setReservationId(reservation.getReservationId());
-            createdReservationDto.setSuccess(savedReservation != null);
-            createdReservationDtos.add(createdReservationDto);
-        }
-        summaryCreatedReservationDto.setReservationIdList(createdReservationDtos);
-        summaryCreatedReservationDto.setSuccess(summaryCreatedReservationDto.getReservationIdList().stream().allMatch(CreatedReservationDto::isSuccess));
-
-        if (!summaryCreatedReservationDto.isSuccess()) {
-            throw new CustomUserException("We are sorry, but cannot make your reservation");
-        }
-        return summaryCreatedReservationDto;
-    }
-
     private SeatDto prepareSeatInformation(Seat seat, List<Long> occupiedSeatsList, Integer price) {
         SeatDto seatDto = new SeatDto();
         seatDto.setId(seat.getSeatId());
@@ -110,7 +80,61 @@ public class ReservationService {
         return seatDto;
     }
 
-    public List<AllReservationDataDto> getAllReservationForUsers() {
+    @Transactional(rollbackFor = CustomReservationException.class)
+    public SummaryCreatedReservationDto createReservation(CreateReservationDto createReservationDto, String userEmail) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new CustomReservationException("User does not exist"));
+        Flight flight = flightRepository.findById(createReservationDto.getFlightId()).orElseThrow(() -> new CustomFlightException("Flight does not exist"));
+        LocalDateTime reservationDate = LocalDateTime.now();
+        List<Seat> seats = seatRepository.findAllById(createReservationDto.getSeatList());
+        SummaryCreatedReservationDto summaryCreatedReservationDto = new SummaryCreatedReservationDto();
+        List<CreatedReservationDto> createdReservationDtos = new ArrayList<>();
+        for (Seat seat : seats) {
+            Reservation savedReservation = createAndSaveReservation(user, flight, seat, reservationDate);
+            CreatedReservationDto createdReservationDto = new CreatedReservationDto();
+            createdReservationDto.setReservationId(savedReservation.getReservationId());
+            createdReservationDto.setSuccess(savedReservation != null);
+            createdReservationDtos.add(createdReservationDto);
+        }
+        summaryCreatedReservationDto.setReservationIdList(createdReservationDtos);
+        summaryCreatedReservationDto.setSuccess(summaryCreatedReservationDto.getReservationIdList().stream().allMatch(CreatedReservationDto::isSuccess));
+
+        if (!summaryCreatedReservationDto.isSuccess()) {
+            throw new CustomReservationException("We are sorry, but cannot make your reservation");
+        }
+
+        validateIfPlaneStillAvailable(flight);
+        return summaryCreatedReservationDto;
+    }
+
+    private Reservation createAndSaveReservation(User user, Flight flight, Seat seat, LocalDateTime reservationDate) {
+        Reservation reservation = new Reservation();
+        reservation.setUser(user);
+        reservation.setFlight(flight);
+        reservation.setSeat(seat);
+        reservation.setReservationDate(reservationDate);
+        ReservationInformation reservationInformation = new ReservationInformation();
+        reservationInformation.setReservationStatus(ReservationStatus.ACTIVE);
+        reservationInformation.setUpdatedAt(Instant.now());
+        reservationInformation.setReservation(reservation);
+        reservationInformationRepository.save(reservationInformation);
+        reservation.setReservationInformation(reservationInformation);
+        return reservationRepository.save(reservation);
+    }
+
+    private void validateIfPlaneStillAvailable(Flight flight) {
+        Integer occupiedSeats = reservationRepository.findAllSeatForFligth(flight.getId()).size();
+        if (occupiedSeats == flight.getPlane().getPlace()) {
+            flight.getFlightInformation().setStatus(FlightStatus.FULL);
+            flight.getFlightInformation().setUpdatedAt(Instant.now());
+        }
+        if (occupiedSeats != flight.getPlane().getPlace() && flight.getFlightInformation().getStatus() == FlightStatus.FULL) {
+            flight.getFlightInformation().setStatus(FlightStatus.AVAILABLE);
+            flight.getFlightInformation().setUpdatedAt(Instant.now());
+        }
+
+    }
+
+    public List<AllReservationDataDto> getAllReservations() {
         List<Reservation> reservation = reservationRepository.findAll();
         List<AllReservationDataDto> allReservationDataDtos = new ArrayList<>();
         reservation.forEach(e -> {
@@ -132,6 +156,7 @@ public class ReservationService {
 
         ReservationDto reservationDto = new ReservationDto();
         Flight flight = reservation.getFlight();
+        reservationDto.setReservationId(reservation.getReservationId());
         reservationDto.setArrivalAirport(flight.getArrivalAirport().getCity());
         reservationDto.setDepartureAirport(flight.getDepartureAirport().getCity());
         reservationDto.setPlaneName(flight.getPlane().getName());
@@ -140,19 +165,9 @@ public class ReservationService {
         reservationDto.setReservationStatus(reservation.getReservationInformation().getReservationStatus());
         reservationDto.setArrivalDate(flight.getArrivalDate());
         reservationDto.setDepartureDate(flight.getDepartureDate());
-        reservationDto.setReservationStatuses(getProperStatusList(reservation));
         return reservationDto;
     }
 
-    private List<ReservationStatus> getProperStatusList(Reservation reservation) {
-        List<ReservationStatus> reservationStatuses = null;
-        if (reservation.getReservationInformation().getReservationStatus() == ReservationStatus.WAITING) {
-            reservationStatuses = List.of(ReservationStatus.SUBMITTED, ReservationStatus.CANCELED);
-        } else if (reservation.getReservationInformation().getReservationStatus() == ReservationStatus.SUBMITTED) {
-            reservationStatuses = List.of(ReservationStatus.CANCELED);
-        }
-        return reservationStatuses;
-    }
 
     @Transactional(readOnly = true)
     public List<ReservationDto> getAllUserReservation(String userEmail) {
@@ -161,10 +176,31 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByUserId(user.getUserId());
         List<ReservationDto> reservationDtos = new ArrayList<>();
         reservations.forEach(reservation -> {
-            if (reservation.getReservationInformation().getReservationStatus() != ReservationStatus.CANCELED) {
-                reservationDtos.add(prepareReservationDto(reservation));
-            }
+            reservationDtos.add(prepareReservationDto(reservation));
         });
         return reservationDtos;
     }
+
+    @Transactional
+    public ResponseDto cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomReservationException("Reservation does not exist!"));
+
+        ReservationInformation reservationInformation = reservation.getReservationInformation();
+        List<String> errorMessage = validateReservation(reservationInformation);
+        if (errorMessage.isEmpty()) {
+            reservationInformation.setReservationStatus(ReservationStatus.CANCELED);
+            reservationInformation.setUpdatedAt(Instant.now());
+            validateIfPlaneStillAvailable(reservation.getFlight());
+        }
+
+        return new ResponseDto(reservation.getReservationId(), errorMessage);
+    }
+
+    private List<String> validateReservation(ReservationInformation reservationInformation) {
+        List<String> errorMessages = new ArrayList<>();
+        Validator validator = validatorFactory.getValidator();
+        validator.validate(reservationInformation).forEach(err -> errorMessages.add(err.getMessage()));
+        return errorMessages;
+    }
+
 }

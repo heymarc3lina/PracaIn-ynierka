@@ -1,22 +1,25 @@
 package com.agatapietrzycka.ticketreservation.service;
 
 import com.agatapietrzycka.ticketreservation.controller.dto.AirportAndPlaneDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.AvailableFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.FlightWithFlightStatusesDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.UpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.model.Airport;
 import com.agatapietrzycka.ticketreservation.model.Flight;
 import com.agatapietrzycka.ticketreservation.model.FlightInformation;
 import com.agatapietrzycka.ticketreservation.model.Plane;
+import com.agatapietrzycka.ticketreservation.model.Reservation;
 import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
+import com.agatapietrzycka.ticketreservation.model.enums.ReservationStatus;
 import com.agatapietrzycka.ticketreservation.repository.AirportRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightInformationRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightRepository;
 import com.agatapietrzycka.ticketreservation.repository.PlaneRepository;
+import com.agatapietrzycka.ticketreservation.repository.ReservationRepository;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomFlightException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,13 +44,13 @@ public class FlightService {
     private final AirportRepository airportRepository;
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final FlightInformationRepository flightInformationRepository;
+    private final ReservationRepository reservationRepository;
 
 
     @Transactional
-    public FlightDto createFlight(CreateOrUpdateFlightDto createOrUpdateFlightDto) {
+    public FlightWithFlightStatusesDto createFlight(CreateOrUpdateFlightDto createOrUpdateFlightDto) {
         Flight flight = mapToFlightEntity(null, createOrUpdateFlightDto);
         validateFlight(flight);
-        FlightDto flightDto = new FlightDto();
         FlightInformation flightInformation = new FlightInformation();
         flightInformation.setFlight(flight);
         flightInformation.setStatus(FlightStatus.NEW);
@@ -54,16 +58,16 @@ public class FlightService {
         flight.setFlightInformation(flightInformation);
         flightInformationRepository.save(flightInformation);
         Flight flightManagedEntity = flightRepository.save(flight);
-        flightDto.setId(flightManagedEntity.getId());
+        FlightWithFlightStatusesDto flightDto = mapToFlightWithFlightStatusesDto(flightManagedEntity);
         return flightDto;
     }
 
     @Transactional
-    public FlightDto updateFlight(Long flightId, CreateOrUpdateFlightDto flightUpdateDto) {
+    public FlightWithFlightStatusesDto updateFlight(Long flightId, CreateOrUpdateFlightDto flightUpdateDto) {
         Flight flight = flightRepository.findById(flightId).orElseThrow();
         fillFlight(flight, flightUpdateDto);
         validateFlight(flight);
-        return mapToFlightDto(flight);
+        return mapToFlightWithFlightStatusesDto(flight);
     }
 
     @Transactional(readOnly = true)
@@ -75,41 +79,42 @@ public class FlightService {
 
     public UpdateFlightDto getDataToUpdate(Long flightId) {
         Flight flight = flightRepository.findById(flightId).orElseThrow();
-        FlightDto flightDto = mapToFlightDto(flight);
+        FlightWithFlightStatusesDto flightDto = mapToFlightWithFlightStatusesDto(flight);
         AirportAndPlaneDto airportAndPlaneDto = new AirportAndPlaneDto(airportRepository.findAll(), planeRepository.findAll());
         return new UpdateFlightDto(flightDto, airportAndPlaneDto);
     }
 
 
     @Transactional
-    public List<FlightDto> getAllFlights() {
+    public List<FlightWithFlightStatusesDto> getAllFlights() {
         List<Flight> flights = flightRepository.findAll();
         for (Flight flight : flights) {
             if (flight.getFlightInformation().getStatus() != FlightStatus.NEW) {
-                if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
+                if (compareDate(flight.getArrivalDate(), flight.getDepartureDate(), false)) {
                     flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
                     flight.getFlightInformation().setUpdatedAt(Instant.now());
                 }
             }
         }
         return flights.stream()
-                .map(this::mapToFlightDto)
+                .map(this::mapToFlightWithFlightStatusesDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public List<AvailableFlightDto> getAllAvailableFlights() {
+    public List<FlightDto> getAllAvailableOrFullFlights() {
         List<Flight> flights = flightRepository.findAllFlightsAtStatus();
         overdateingFlights(flights);
         return flights.stream()
-                .map(this::mapToAvailableFlightListElement)
+                .map(this::mapToFlightDto)
                 .collect(Collectors.toList());
     }
 
     private void overdateingFlights(List<Flight> flights){
         for (Flight flight : flights) {
-            if (flight.getFlightInformation().getStatus() != FlightStatus.NEW) {
-                if (compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
+            FlightStatus flightStatus = flight.getFlightInformation().getStatus();
+            if (flightStatus != FlightStatus.NEW) {
+                if (compareDate(flight.getArrivalDate(), flight.getDepartureDate(), false)) {
                     flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
                     flight.getFlightInformation().setUpdatedAt(Instant.now());
                     flights.remove(flight);
@@ -117,7 +122,6 @@ public class FlightService {
             }
         }
     }
-
 
     @Transactional
     public ResponseFlightListDto changeStatus(FlightStatusDto flightStatusDto) {
@@ -133,36 +137,19 @@ public class FlightService {
                 flightInformation.setUpdatedAt(Instant.now());
             }
         }
-        List<FlightDto> flightListElements = flightRepository.findAll().stream()
-                .map(this::mapToFlightDto)
+        if (flightStatusDto.getFlightStatus() == FlightStatus.CANCELLED) {
+            List<Reservation> reservation = reservationRepository.findAllByFlightId(flight.getId());
+            reservation.forEach(r -> {
+                r.getReservationInformation().setReservationStatus(ReservationStatus.CANCELED);
+                r.getReservationInformation().setUpdatedAt(Instant.now());
+            });
+        }
+
+        List<FlightWithFlightStatusesDto> flightListElements = flightRepository.findAll().stream()
+                .map(this::mapToFlightWithFlightStatusesDto)
                 .collect(Collectors.toList());
 
         return new ResponseFlightListDto(flightListElements, errorMessage);
-
-    }
-
-    private AvailableFlightDto mapToAvailableFlightListElement(Flight flight) {
-        AvailableFlightDto availableFlightDto = new AvailableFlightDto();
-        availableFlightDto.setId(flight.getId());
-        availableFlightDto.setArrivalAirports(flight.getArrivalAirport().getCity());
-        availableFlightDto.setArrivalDate(flight.getArrivalDate());
-        availableFlightDto.setDepartureAirports(flight.getDepartureAirport().getCity());
-        availableFlightDto.setDepartureDate(flight.getDepartureDate());
-        availableFlightDto.setMinPrice(flight.getPrice());
-        return availableFlightDto;
-    }
-
-    private List<FlightStatus> getProperStatusList(Flight flight) {
-        List<FlightStatus> flightStatuses = null;
-        if (flight.getFlightInformation().getStatus() == FlightStatus.AVAILABLE) {
-            flightStatuses = List.of(FlightStatus.OVERDATE, FlightStatus.CANCELLED);
-        } else if (flight.getFlightInformation().getStatus() == FlightStatus.NEW) {
-            flightStatuses = List.of(FlightStatus.AVAILABLE, FlightStatus.CANCELLED);
-        } else if (flight.getFlightInformation().getStatus() == FlightStatus.OVERDATE) {
-            flightStatuses = List.of(FlightStatus.CANCELLED);
-        }
-
-        return flightStatuses;
     }
 
     private FlightDto mapToFlightDto(Flight flight) {
@@ -174,8 +161,30 @@ public class FlightService {
         flightDto.setDepartureDate(flight.getDepartureDate());
         flightDto.setMinPrice(flight.getPrice());
         flightDto.setFlightStatus(flight.getFlightInformation().getStatus());
-        flightDto.setFlightStatuses(getProperStatusList(flight));
         return flightDto;
+    }
+
+    private List<FlightStatus> getProperStatusList(Flight flight) {
+        List<FlightStatus> flightStatuses = null;
+        FlightStatus flightStatus = flight.getFlightInformation().getStatus();
+
+        if (flightStatus == FlightStatus.AVAILABLE || flightStatus == FlightStatus.FULL) {
+            flightStatuses = List.of(FlightStatus.CANCELLED);
+        } else if (flightStatus == FlightStatus.NEW) {
+            flightStatuses = List.of(FlightStatus.AVAILABLE, FlightStatus.CANCELLED);
+        } else if (flightStatus == FlightStatus.OVERDATE) {
+            flightStatuses = List.of(FlightStatus.CANCELLED);
+        }
+
+        return flightStatuses;
+    }
+
+    private FlightWithFlightStatusesDto mapToFlightWithFlightStatusesDto(Flight flight) {
+        FlightWithFlightStatusesDto flightWithFlightStatusesDto = new FlightWithFlightStatusesDto();
+        FlightDto flightDto = mapToFlightDto(flight);
+        flightWithFlightStatusesDto.setFlightDto(flightDto);
+        flightWithFlightStatusesDto.setFlightStatuses(getProperStatusList(flight));
+        return flightWithFlightStatusesDto;
     }
 
     private Flight mapToFlightEntity(Flight flight, CreateOrUpdateFlightDto flightDto) {
@@ -209,7 +218,7 @@ public class FlightService {
         if (flight.getArrivalAirport().getAirportId() == flight.getDepartureAirport().getAirportId()) {
             throw new CustomFlightException("The same airports are chosen: arrival airport = departure airport.");
         }
-        if (flight.getArrivalDate() == flight.getDepartureDate() || compareDate(flight.getArrivalDate(), flight.getDepartureDate())) {
+        if (flight.getArrivalDate() == flight.getDepartureDate() || compareDate(flight.getArrivalDate(), flight.getDepartureDate(), true)) {
             throw new CustomFlightException("Dates are the same or are overdue.");
         }
 
@@ -217,9 +226,15 @@ public class FlightService {
         validator.validate(flight);
     }
 
-    private Boolean compareDate(LocalDateTime arrivalDate, LocalDateTime departureDate) {
-        int compareArrival = arrivalDate.compareTo(LocalDateTime.now());
-        int compareDeparture = departureDate.compareTo(LocalDateTime.now());
+    private Boolean compareDate(LocalDateTime arrivalDate, LocalDateTime departureDate, boolean creatingFlight) {
+        LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("UTC"));
+        if (creatingFlight) {
+            currentTime.plusHours(5);
+        } else {
+            currentTime.plusHours(3);
+        }
+        int compareArrival = arrivalDate.compareTo(currentTime);
+        int compareDeparture = departureDate.compareTo(currentTime);
         if (compareArrival <= 0 || compareDeparture <= 0) {
             return true;
         }

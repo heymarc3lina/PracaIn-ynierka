@@ -10,12 +10,10 @@ public class StatusEnumConverter implements AttributeConverter<ReservationStatus
     @Override
     public Integer convertToDatabaseColumn(ReservationStatus attribute) {
         switch (attribute) {
-            case SUBMITTED:
+            case ACTIVE:
                 return 1;
             case CANCELED:
                 return 2;
-            case WAITING:
-                return 3;
             default:
                 throw new CustomReservationException(attribute + " is not supported!");
         }
@@ -25,11 +23,9 @@ public class StatusEnumConverter implements AttributeConverter<ReservationStatus
     public ReservationStatus convertToEntityAttribute(Integer dbData) {
         switch (dbData) {
             case 1:
-                return ReservationStatus.SUBMITTED;
+                return ReservationStatus.ACTIVE;
             case 2:
                 return ReservationStatus.CANCELED;
-            case 3:
-                return ReservationStatus.WAITING;
             default:
                 throw new CustomReservationException(dbData + " is not supported!");
         }

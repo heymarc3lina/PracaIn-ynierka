@@ -7,11 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 public class ReservationDto {
+    Long reservationId;
     @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
     LocalDateTime reservationDate;
     String planeName;
@@ -23,5 +23,4 @@ public class ReservationDto {
     LocalDateTime departureDate;
     Integer seatNumber;
     ReservationStatus reservationStatus;
-    List<ReservationStatus> reservationStatuses;
 }

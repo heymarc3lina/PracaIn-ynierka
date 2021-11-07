@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface FlightRepository extends JpaRepository<Flight, Long> {
-    @Query("SELECT f FROM Flight f WHERE f.flightInformation.status = 2")
+    @Query("SELECT f FROM Flight f WHERE f.flightInformation.status = 2 or f.flightInformation.status = 5")
     List<Flight> findAllFlightsAtStatus();
 
 

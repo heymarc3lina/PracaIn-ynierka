@@ -5,6 +5,6 @@ public enum FlightStatus {
     AVAILABLE,
     OVERDATE,
     CANCELLED,
-    CLOSED;
+    FULL;
 
 }

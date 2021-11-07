@@ -17,7 +17,7 @@ public Integer convertToDatabaseColumn(FlightStatus attribute){
             return 3;
         case CANCELLED:
             return 4;
-        case CLOSED:
+        case FULL:
             return 5;
         default:
             throw new CustomFlightException(attribute + " is not supported!");
@@ -36,7 +36,7 @@ public Integer convertToDatabaseColumn(FlightStatus attribute){
             case 4:
                 return FlightStatus.CANCELLED;
             case 5:
-                return FlightStatus.CLOSED;
+                return FlightStatus.FULL;
             default:
                 throw new CustomFlightException(dbData + " is not supported!");
         }

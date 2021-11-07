@@ -10,6 +10,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class ResponseFlightListDto {
-    private List<FlightDto> flights;
+    private List<FlightWithFlightStatusesDto> flights;
     private List<String> errorMessage;
 }

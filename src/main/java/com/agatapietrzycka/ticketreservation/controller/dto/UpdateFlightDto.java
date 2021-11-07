@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class UpdateFlightDto {
-    FlightDto flightDto;
+    FlightWithFlightStatusesDto flightDto;
     AirportAndPlaneDto airportAndPlaneDto;
 
 }
