@@ -3,6 +3,7 @@ package com.agatapietrzycka.ticketreservation.service;
 import com.agatapietrzycka.ticketreservation.controller.dto.CreateUserDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.model.Role;
+import com.agatapietrzycka.ticketreservation.model.Token;
 import com.agatapietrzycka.ticketreservation.model.User;
 import com.agatapietrzycka.ticketreservation.model.enums.RoleType;
 import com.agatapietrzycka.ticketreservation.repository.RoleRepository;
@@ -19,6 +20,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,19 +35,28 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+    private final EmailService emailService;
+    private final TokenService tokenService;
 
-    public ResponseDto createUser(CreateUserDto createUserDto, Set<RoleType> roles ){
-      if(isEmailAlreadyTaken(createUserDto.getEmail())){
-          throw new CustomUserException(String.format("Email: %s is already in use!", createUserDto.getEmail()));
-      }
+    public ResponseDto createUser(CreateUserDto createUserDto, Set<RoleType> roles) {
+        if (isEmailAlreadyTaken(createUserDto.getEmail())) {
+            throw new CustomUserException(String.format("Email: %s is already in use!", createUserDto.getEmail()));
+        }
         Set<Role> mappedRoles = mapRoles(roles);
         User mappedUser = mapToEntity(createUserDto, mappedRoles);
         List<String> errorMessages = getErrorMessages(mappedUser);
         ResponseDto response = new ResponseDto(null, errorMessages);
-        if(errorMessages.isEmpty()){
+        if (errorMessages.isEmpty()) {
             roleRepository.saveAll(mappedRoles);
             User user = userRepository.save(mappedUser);
             response.setId(user.getUserId());
+            if (roles.contains(RoleType.USER)) {
+                final Token activationToken = tokenService.createActivationToken(user);
+                emailService.sendAccountActivationEmail(activationToken);
+            } else {
+                user.setActive(true);
+                user.setActivationDate(LocalDateTime.now());
+            }
 
         }
         return response;
@@ -69,7 +80,7 @@ public class UserService implements UserDetailsService {
 
     private User mapToEntity(CreateUserDto createUserDto, Set<Role> roles) {
         User user = new User();
-        user.setActive(true);
+        user.setActive(false);
         user.setSurname(createUserDto.getSurname());
         user.setName(createUserDto.getName());
         user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));

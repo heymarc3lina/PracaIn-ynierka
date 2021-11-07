@@ -17,8 +17,8 @@ public class DataToReservationDto {
     private String arrivalAirports;
     @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
     private LocalDateTime arrivalDate;
-    @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
     private String departureAirports;
+    @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
     private LocalDateTime departureDate;
     private List<SeatDto> seats;
 }

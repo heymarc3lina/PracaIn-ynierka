@@ -22,6 +22,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +53,7 @@ public class User implements UserDetails {
     @Email(message = "Email address must be of correct format!")
     private String email;
     private boolean isActive;
+    private LocalDateTime activationDate;
     private Instant createdDate;
 
     @ManyToMany(fetch = FetchType.EAGER)

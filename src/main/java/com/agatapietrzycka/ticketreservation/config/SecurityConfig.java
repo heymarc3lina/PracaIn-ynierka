@@ -47,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/swagger-resources/**").permitAll()
                 .antMatchers("/ticketreservation/api/login").permitAll()
                 .antMatchers("/ticketreservation/api/register/user").permitAll()
+                .antMatchers("/ticketreservation/api/register/activate/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

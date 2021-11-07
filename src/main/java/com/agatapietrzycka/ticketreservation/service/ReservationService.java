@@ -44,6 +44,7 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final ReservationInformationRepository reservationInformationRepository;
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+    private final EmailService emailService;
 
     @Transactional(readOnly = true)
     public DataToReservationDto prepareDataToReservation(Long flightId) {
@@ -103,7 +104,20 @@ public class ReservationService {
         }
 
         validateIfPlaneStillAvailable(flight);
+        emailService.sendReservationSumary(flight, seats, user, reservationDate, calculatePrice(seats, flight));
         return summaryCreatedReservationDto;
+    }
+
+    private double calculatePrice(List<Seat> seats, Flight flight) {
+        double price = 0;
+        List<Double> priceForSeat = new ArrayList<>();
+        seats.forEach(e -> {
+            priceForSeat.add(e.getClassType().getCalculatePrice() * flight.getPrice());
+        });
+        for (double p : priceForSeat) {
+            price += p;
+        }
+        return price;
     }
 
     private Reservation createAndSaveReservation(User user, Flight flight, Seat seat, LocalDateTime reservationDate) {
