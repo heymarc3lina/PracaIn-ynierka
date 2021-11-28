@@ -48,8 +48,8 @@ public class EmailService {
                 "Reservation time: " + reservationDate.format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
                 "Name and surname: " + user.getName() + " " + user.getSurname() + "\n " +
                 "Plane: " + flight.getPlane().getName() + "\n" +
-                "Arrival airport and date: " + flight.getArrivalAirport().getCity() + " " + flight.getArrivalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
                 "Departure airport and date: " + flight.getDepartureAirport().getCity() + " " + flight.getDepartureDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
+                "Arrival airport and date: " + flight.getArrivalAirport().getCity() + " " + flight.getArrivalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
                 "Seats: \n" + seatsList + "\n" +
                 "Price: " + price + "\n");
         emailSender.send(simpleMailMessage);
