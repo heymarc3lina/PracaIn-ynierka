@@ -6,7 +6,7 @@ import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightWithFlightStatusesDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.UpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.model.Airport;
 import com.agatapietrzycka.ticketreservation.model.Flight;
@@ -89,7 +89,7 @@ public class FlightService {
     public List<FlightWithFlightStatusesDto> getAllFlights() {
         List<Flight> flights = flightRepository.findAll();
         for (Flight flight : flights) {
-            if (flight.getFlightInformation().getStatus() != FlightStatus.NEW) {
+            if (flight.getFlightInformation().getStatus() == FlightStatus.AVAILABLE || flight.getFlightInformation().getStatus() == FlightStatus.FULL) {
                 if (compareDate(flight.getArrivalDate(), flight.getDepartureDate(), false)) {
                     flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
                     flight.getFlightInformation().setUpdatedAt(Instant.now());
@@ -124,7 +124,7 @@ public class FlightService {
     }
 
     @Transactional
-    public ResponseFlightListDto changeStatus(FlightStatusDto flightStatusDto) {
+    public ResponseDto changeStatus(FlightStatusDto flightStatusDto) {
         Flight flight = flightRepository.findById(flightStatusDto.getFlightId()).orElseThrow(() -> new CustomFlightException("Flight does not exist!"));
 
         FlightInformation flightInformation = flight.getFlightInformation();
@@ -144,12 +144,7 @@ public class FlightService {
                 r.getReservationInformation().setUpdatedAt(Instant.now());
             });
         }
-
-        List<FlightWithFlightStatusesDto> flightListElements = flightRepository.findAll().stream()
-                .map(this::mapToFlightWithFlightStatusesDto)
-                .collect(Collectors.toList());
-
-        return new ResponseFlightListDto(flightListElements, errorMessage);
+        return new ResponseDto(flight.getId(), errorMessage);
     }
 
     private FlightDto mapToFlightDto(Flight flight) {

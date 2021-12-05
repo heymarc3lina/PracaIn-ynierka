@@ -6,7 +6,7 @@ import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.FlightWithFlightStatusesDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseFlightListDto;
+import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.controller.dto.UpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.model.Flight;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
@@ -62,7 +62,7 @@ public class FlightController {
     @PutMapping
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseFlightListDto changeFlightStatus(@RequestBody FlightStatusDto flightStatusDto) {
+    public ResponseDto changeFlightStatus(@RequestBody FlightStatusDto flightStatusDto) {
         return flightService.changeStatus(flightStatusDto);
     }
 
