@@ -31,8 +31,11 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -149,7 +152,11 @@ public class ReservationService {
     }
 
     public List<AllReservationDataDto> getAllReservations() {
-        List<Reservation> reservation = reservationRepository.findAll();
+        List<Reservation> reservation = reservationRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(Reservation::getReservationDate).reversed())
+                .collect(Collectors.toList());
+        ;
         List<AllReservationDataDto> allReservationDataDtos = new ArrayList<>();
         reservation.forEach(e -> {
             AllReservationDataDto allReservationDataDto = new AllReservationDataDto();
@@ -176,18 +183,34 @@ public class ReservationService {
         reservationDto.setPlaneName(flight.getPlane().getName());
         reservationDto.setReservationDate(reservation.getReservationDate());
         reservationDto.setSeatNumber(reservation.getSeat().getSeatNumber());
+        if (reservation.getReservationInformation().getReservationStatus().equals(ReservationStatus.ACTIVE) && compareDate(flight.getDepartureDate())) {
+            reservation.getReservationInformation().setUpdatedAt(Instant.now());
+            reservation.getReservationInformation().setReservationStatus(ReservationStatus.COMPLETED);
+        }
         reservationDto.setReservationStatus(reservation.getReservationInformation().getReservationStatus());
         reservationDto.setArrivalDate(flight.getArrivalDate());
         reservationDto.setDepartureDate(flight.getDepartureDate());
         return reservationDto;
     }
 
+    private Boolean compareDate(LocalDateTime departureDate) {
+        LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("UTC"));
+
+        int compareDeparture = departureDate.compareTo(currentTime);
+        if (compareDeparture <= 0) {
+            return true;
+        }
+        return false;
+    }
 
     @Transactional(readOnly = true)
     public List<ReservationDto> getAllUserReservation(String userEmail) {
         User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new CustomReservationException("User does not exist"));
 
-        List<Reservation> reservations = reservationRepository.findAllByUserId(user.getUserId());
+        List<Reservation> reservations = reservationRepository.findAllByUserId(user.getUserId())
+                .stream()
+                .sorted(Comparator.comparing(Reservation::getReservationDate)
+                        .reversed()).collect(Collectors.toList());
         List<ReservationDto> reservationDtos = new ArrayList<>();
         reservations.forEach(reservation -> {
             reservationDtos.add(prepareReservationDto(reservation));

@@ -14,6 +14,8 @@ public class StatusEnumConverter implements AttributeConverter<ReservationStatus
                 return 1;
             case CANCELED:
                 return 2;
+            case COMPLETED:
+                return 3;
             default:
                 throw new CustomReservationException(attribute + " is not supported!");
         }
@@ -26,6 +28,8 @@ public class StatusEnumConverter implements AttributeConverter<ReservationStatus
                 return ReservationStatus.ACTIVE;
             case 2:
                 return ReservationStatus.CANCELED;
+            case 3:
+                return ReservationStatus.COMPLETED;
             default:
                 throw new CustomReservationException(dbData + " is not supported!");
         }
