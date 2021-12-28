@@ -79,7 +79,7 @@ public class FlightService {
 
     public UpdateFlightDto getDataToUpdate(Long flightId) {
         Flight flight = flightRepository.findById(flightId).orElseThrow();
-        FlightWithFlightStatusesDto flightDto = mapToFlightWithFlightStatusesDto(flight);
+        FlightDto flightDto = mapToFlightDto(flight);
         AirportAndPlaneDto airportAndPlaneDto = new AirportAndPlaneDto(airportRepository.findAll(), planeRepository.findAll());
         return new UpdateFlightDto(flightDto, airportAndPlaneDto);
     }
@@ -156,6 +156,7 @@ public class FlightService {
         flightDto.setDepartureDate(flight.getDepartureDate());
         flightDto.setMinPrice(flight.getPrice());
         flightDto.setFlightStatus(flight.getFlightInformation().getStatus());
+        flightDto.setPlaneId(flight.getPlane().getPlaneId());
         return flightDto;
     }
 

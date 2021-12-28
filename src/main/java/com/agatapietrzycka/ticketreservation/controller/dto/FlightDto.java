@@ -20,5 +20,6 @@ public class FlightDto {
         private LocalDateTime departureDate;
         private Integer minPrice;
         private FlightStatus flightStatus;
+        private Long planeId;
 
 }
