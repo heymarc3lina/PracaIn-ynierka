@@ -57,5 +57,13 @@ databaseChangeLog:
             encoding: UTF-8
             path: db/sql/seatPlane5.sql
 
+  - changeSet:
+      id: remove redundant data
+      author: AgataPietrzycka
+      changes:
+        - sql:
+            dbms: postgresql
+            sql: DELETE FROM Airport WHERE airport.airport_id=10;
+
 
 

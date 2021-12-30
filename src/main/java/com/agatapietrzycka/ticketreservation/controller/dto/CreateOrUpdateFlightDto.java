@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 
 @Getter
 public class CreateOrUpdateFlightDto {
-    private Long plainId;
-    private Long arrivalAirportId;
-    private Long departureAirportId;
+    private String plain;
+    private String arrivalAirport;
+    private String departureAirport;
     @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
     private LocalDateTime arrivalDate;
     @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)

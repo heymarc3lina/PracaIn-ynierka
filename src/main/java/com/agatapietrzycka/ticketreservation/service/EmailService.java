@@ -50,8 +50,8 @@ public class EmailService {
                 "Plane: " + flight.getPlane().getName() + "\n" +
                 "Departure airport and date: " + flight.getDepartureAirport().getCity() + " " + flight.getDepartureDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
                 "Arrival airport and date: " + flight.getArrivalAirport().getCity() + " " + flight.getArrivalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
-                "Seats: \n" + seatsList + "\n" +
-                "Price: " + price + "\n");
+                "Seats: \n" + String.join("", seatsList) + "\n" +
+                "Price: " + price + " pln\n");
         emailSender.send(simpleMailMessage);
     }
 }

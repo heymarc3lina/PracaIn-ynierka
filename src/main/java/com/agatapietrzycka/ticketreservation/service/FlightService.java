@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,10 @@ public class FlightService {
 
     @Transactional
     public List<FlightWithFlightStatusesDto> getAllFlights() {
-        List<Flight> flights = flightRepository.findAll();
+        List<Flight> flights = flightRepository.findAll().stream()
+                .sorted(Comparator.comparing(Flight::getDepartureDate).reversed())
+                .collect(Collectors.toList());
+        ;
         for (Flight flight : flights) {
             if (flight.getFlightInformation().getStatus() == FlightStatus.AVAILABLE || flight.getFlightInformation().getStatus() == FlightStatus.FULL) {
                 if (compareDate(flight.getArrivalDate(), flight.getDepartureDate(), false)) {
@@ -191,11 +195,11 @@ public class FlightService {
         return fillFlight(flight, flightDto);
     }
 
-    private Flight fillFlight(Flight flight, CreateOrUpdateFlightDto flightDto){
-        flight.setArrivalAirport(airportRepository.getById(flightDto.getArrivalAirportId()));
-        flight.setDepartureAirport(airportRepository.getById(flightDto.getDepartureAirportId()));
+    private Flight fillFlight(Flight flight, CreateOrUpdateFlightDto flightDto) {
+        flight.setArrivalAirport(airportRepository.getByCity(flightDto.getArrivalAirport()));
+        flight.setDepartureAirport(airportRepository.getByCity(flightDto.getDepartureAirport()));
         flight.setPrice(flightDto.getPrice());
-        flight.setPlane(planeRepository.getById(flightDto.getPlainId()));
+        flight.setPlane(planeRepository.getByName(flightDto.getPlain()));
         flight.setArrivalDate(flightDto.getArrivalDate());
         flight.setDepartureDate(flightDto.getDepartureDate());
 
