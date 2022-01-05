@@ -1,6 +1,6 @@
 package com.agatapietrzycka.ticketreservation.repository;
 
-import com.agatapietrzycka.ticketreservation.model.Airport;
+import com.agatapietrzycka.ticketreservation.entity.Airport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

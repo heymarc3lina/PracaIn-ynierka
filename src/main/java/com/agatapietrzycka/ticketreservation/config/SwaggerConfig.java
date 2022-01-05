@@ -1,6 +1,6 @@
 package com.agatapietrzycka.ticketreservation.config;
 
-import com.agatapietrzycka.ticketreservation.model.User;
+import com.agatapietrzycka.ticketreservation.entity.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;

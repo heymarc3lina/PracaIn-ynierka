@@ -1,8 +1,9 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
-import com.agatapietrzycka.ticketreservation.controller.dto.CreateUserDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
-import com.agatapietrzycka.ticketreservation.model.enums.RoleType;
+import com.agatapietrzycka.ticketreservation.dto.CreateUserDto;
+import com.agatapietrzycka.ticketreservation.dto.ResponseDto;
+import com.agatapietrzycka.ticketreservation.dto.UserDto;
+import com.agatapietrzycka.ticketreservation.entity.enums.RoleType;
 import com.agatapietrzycka.ticketreservation.service.TokenService;
 import com.agatapietrzycka.ticketreservation.service.UserService;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -44,6 +46,13 @@ public class RegistrationController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseDto createAdminAccount(@RequestBody CreateUserDto createUserDto) {
         return userService.createUser(createUserDto, Set.of(RoleType.ADMIN));
+    }
+
+    @GetMapping("/allRegisteredUsers")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public List<UserDto> showRegisteredUser() {
+        return userService.getUsers();
     }
 
     @GetMapping("/activate/{token}")

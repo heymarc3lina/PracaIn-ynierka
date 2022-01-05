@@ -1,9 +1,9 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
 import com.agatapietrzycka.ticketreservation.config.LoginCredentials;
-import com.agatapietrzycka.ticketreservation.controller.dto.RoleDto;
-import com.agatapietrzycka.ticketreservation.model.Role;
-import com.agatapietrzycka.ticketreservation.model.User;
+import com.agatapietrzycka.ticketreservation.dto.RoleDto;
+import com.agatapietrzycka.ticketreservation.entity.Role;
+import com.agatapietrzycka.ticketreservation.entity.User;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomUserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

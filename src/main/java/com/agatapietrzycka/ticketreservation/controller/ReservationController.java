@@ -1,13 +1,13 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
 
-import com.agatapietrzycka.ticketreservation.controller.dto.AllReservationDataDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.CreateReservationDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.DataToReservationDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ReservationDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.SummaryCreatedReservationDto;
-import com.agatapietrzycka.ticketreservation.model.User;
+import com.agatapietrzycka.ticketreservation.dto.AllReservationDataDto;
+import com.agatapietrzycka.ticketreservation.dto.CreateReservationDto;
+import com.agatapietrzycka.ticketreservation.dto.DataToReservationDto;
+import com.agatapietrzycka.ticketreservation.dto.ReservationDto;
+import com.agatapietrzycka.ticketreservation.dto.ResponseDto;
+import com.agatapietrzycka.ticketreservation.dto.SummaryCreatedReservationDto;
+import com.agatapietrzycka.ticketreservation.entity.User;
 import com.agatapietrzycka.ticketreservation.service.ReservationService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

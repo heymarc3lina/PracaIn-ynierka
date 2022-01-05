@@ -1,9 +1,9 @@
 package com.agatapietrzycka.ticketreservation.service;
 
-import com.agatapietrzycka.ticketreservation.model.Flight;
-import com.agatapietrzycka.ticketreservation.model.Seat;
-import com.agatapietrzycka.ticketreservation.model.Token;
-import com.agatapietrzycka.ticketreservation.model.User;
+import com.agatapietrzycka.ticketreservation.entity.Flight;
+import com.agatapietrzycka.ticketreservation.entity.Seat;
+import com.agatapietrzycka.ticketreservation.entity.Token;
+import com.agatapietrzycka.ticketreservation.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

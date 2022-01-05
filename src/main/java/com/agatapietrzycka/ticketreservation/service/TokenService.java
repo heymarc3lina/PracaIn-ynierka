@@ -1,7 +1,7 @@
 package com.agatapietrzycka.ticketreservation.service;
 
-import com.agatapietrzycka.ticketreservation.model.Token;
-import com.agatapietrzycka.ticketreservation.model.User;
+import com.agatapietrzycka.ticketreservation.entity.Token;
+import com.agatapietrzycka.ticketreservation.entity.User;
 import com.agatapietrzycka.ticketreservation.repository.TokenRepository;
 import com.agatapietrzycka.ticketreservation.util.exception.ActivationTokenException;
 import lombok.RequiredArgsConstructor;

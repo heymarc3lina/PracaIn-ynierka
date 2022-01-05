@@ -1,11 +1,12 @@
 package com.agatapietrzycka.ticketreservation.service;
 
-import com.agatapietrzycka.ticketreservation.controller.dto.CreateUserDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
-import com.agatapietrzycka.ticketreservation.model.Role;
-import com.agatapietrzycka.ticketreservation.model.Token;
-import com.agatapietrzycka.ticketreservation.model.User;
-import com.agatapietrzycka.ticketreservation.model.enums.RoleType;
+import com.agatapietrzycka.ticketreservation.dto.CreateUserDto;
+import com.agatapietrzycka.ticketreservation.dto.ResponseDto;
+import com.agatapietrzycka.ticketreservation.dto.UserDto;
+import com.agatapietrzycka.ticketreservation.entity.Role;
+import com.agatapietrzycka.ticketreservation.entity.Token;
+import com.agatapietrzycka.ticketreservation.entity.User;
+import com.agatapietrzycka.ticketreservation.entity.enums.RoleType;
 import com.agatapietrzycka.ticketreservation.repository.RoleRepository;
 import com.agatapietrzycka.ticketreservation.repository.UserRepository;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomUserException;
@@ -21,6 +22,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,22 +44,16 @@ public class UserService implements UserDetailsService {
         if (isEmailAlreadyTaken(createUserDto.getEmail())) {
             throw new CustomUserException(String.format("Email: %s is already in use!", createUserDto.getEmail()));
         }
-        Set<Role> mappedRoles = mapRoles(roles);
-        User mappedUser = mapToEntity(createUserDto, mappedRoles);
+        User mappedUser = mapToEntity(createUserDto, roles);
         List<String> errorMessages = getErrorMessages(mappedUser);
         ResponseDto response = new ResponseDto(null, errorMessages);
         if (errorMessages.isEmpty()) {
-            roleRepository.saveAll(mappedRoles);
             User user = userRepository.save(mappedUser);
             response.setId(user.getUserId());
             if (roles.contains(RoleType.USER)) {
                 final Token activationToken = tokenService.createActivationToken(user);
                 emailService.sendAccountActivationEmail(activationToken);
-            } else {
-                user.setActive(true);
-                user.setActivationDate(LocalDateTime.now());
             }
-
         }
         return response;
     }
@@ -72,21 +68,27 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toSet());
     }
 
-    private Role mapRole(RoleType roleType){
+    private Role mapRole(RoleType roleType) {
         Role role = new Role();
         role.setRole(roleType);
-        return role;
+        roleRepository.save(role);
+        return roleRepository.save(role);
     }
 
-    private User mapToEntity(CreateUserDto createUserDto, Set<Role> roles) {
+    private User mapToEntity(CreateUserDto createUserDto, Set<RoleType> roles) {
         User user = new User();
-        user.setActive(false);
         user.setSurname(createUserDto.getSurname());
         user.setName(createUserDto.getName());
         user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
         user.setEmail(createUserDto.getEmail());
         user.setCreatedDate(Instant.now());
-        user.setRoles(roles);
+        user.setRoles(mapRoles(roles));
+        if (roles.contains(RoleType.USER)) {
+            user.setActive(false);
+        } else {
+            user.setActive(true);
+            user.setActivationDate(LocalDateTime.now());
+        }
         return user;
     }
 
@@ -102,5 +104,23 @@ public class UserService implements UserDetailsService {
         Optional<User> user = userRepository.findByEmailAndIsActive(email, true);
         return user
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("Email: %s not found", email)));
+    }
+
+    public List<UserDto> getUsers() {
+        List<User> allUsers = userRepository.findAll();
+        List<UserDto> userDtos = new ArrayList<>();
+        allUsers.forEach(user -> {
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getUserId());
+            userDto.setName(user.getName());
+            userDto.setSurname(user.getName());
+            userDto.setEmail(user.getEmail());
+            userDto.setRole(user.getRoles().stream().findFirst().orElseThrow(() -> new CustomUserException("User does not have any role")).getRole().name());
+            userDto.setActivationDate(user.getActivationDate());
+            userDto.setIsActive(user.isActive());
+            userDto.setCreatedDate(LocalDateTime.ofInstant(user.getCreatedDate(), ZoneId.systemDefault()));
+            userDtos.add(userDto);
+        });
+        return userDtos;
     }
 }

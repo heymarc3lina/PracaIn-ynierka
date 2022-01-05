@@ -1,6 +1,6 @@
 package com.agatapietrzycka.ticketreservation.util;
 
-import com.agatapietrzycka.ticketreservation.model.enums.FlightStatus;
+import com.agatapietrzycka.ticketreservation.entity.enums.FlightStatus;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomFlightException;
 
 import javax.persistence.AttributeConverter;

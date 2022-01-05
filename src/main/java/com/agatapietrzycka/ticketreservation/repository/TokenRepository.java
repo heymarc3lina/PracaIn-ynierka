@@ -1,6 +1,6 @@
 package com.agatapietrzycka.ticketreservation.repository;
 
-import com.agatapietrzycka.ticketreservation.model.Token;
+import com.agatapietrzycka.ticketreservation.entity.Token;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

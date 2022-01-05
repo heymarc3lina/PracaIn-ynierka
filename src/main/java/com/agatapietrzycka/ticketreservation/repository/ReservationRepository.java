@@ -1,6 +1,6 @@
 package com.agatapietrzycka.ticketreservation.repository;
 
-import com.agatapietrzycka.ticketreservation.model.Reservation;
+import com.agatapietrzycka.ticketreservation.entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

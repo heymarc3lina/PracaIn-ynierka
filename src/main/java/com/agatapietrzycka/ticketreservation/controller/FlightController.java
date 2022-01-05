@@ -1,14 +1,14 @@
 package com.agatapietrzycka.ticketreservation.controller;
 
-import com.agatapietrzycka.ticketreservation.controller.dto.AirportAndPlaneDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.CreateOrUpdateFlightDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.FilterFlightDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.FlightDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.FlightStatusDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.FlightWithFlightStatusesDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.ResponseDto;
-import com.agatapietrzycka.ticketreservation.controller.dto.UpdateFlightDto;
-import com.agatapietrzycka.ticketreservation.model.Flight;
+import com.agatapietrzycka.ticketreservation.dto.AirportAndPlaneDto;
+import com.agatapietrzycka.ticketreservation.dto.CreateOrUpdateFlightDto;
+import com.agatapietrzycka.ticketreservation.dto.FilterFlightDto;
+import com.agatapietrzycka.ticketreservation.dto.FlightDto;
+import com.agatapietrzycka.ticketreservation.dto.FlightStatusDto;
+import com.agatapietrzycka.ticketreservation.dto.FlightWithFlightStatusesDto;
+import com.agatapietrzycka.ticketreservation.dto.ResponseDto;
+import com.agatapietrzycka.ticketreservation.dto.UpdateFlightDto;
+import com.agatapietrzycka.ticketreservation.entity.Flight;
 import com.agatapietrzycka.ticketreservation.service.FlightService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
