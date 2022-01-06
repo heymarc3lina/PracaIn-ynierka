@@ -18,7 +18,7 @@ public class FlightDto {
         private String departureAirports;
         @JsonFormat(pattern = ApplicationConstants.DATE_FORMAT_WITH_TIME)
         private LocalDateTime departureDate;
-        private Integer minPrice;
+        private Double minPrice;
         private FlightStatus flightStatus;
         private Long planeId;
 

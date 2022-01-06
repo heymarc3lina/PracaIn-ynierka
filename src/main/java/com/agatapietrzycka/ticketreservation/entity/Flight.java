@@ -45,7 +45,7 @@ public class Flight {
     @JoinColumn(name = "departureAirport_id", nullable = false)
     private Airport departureAirport;
     @NotNull
-    private Integer price;
+    private Double price;
     @OneToOne
     @JoinColumn(name = "status_id")
     private FlightInformation flightInformation;

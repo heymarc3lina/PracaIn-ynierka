@@ -67,7 +67,7 @@ public class ReservationService {
 
     }
 
-    private SeatDto prepareSeatInformation(Seat seat, List<Long> occupiedSeatsList, Integer price) {
+    private SeatDto prepareSeatInformation(Seat seat, List<Long> occupiedSeatsList, Double price) {
         SeatDto seatDto = new SeatDto();
         seatDto.setId(seat.getSeatId());
         seatDto.setSeatNumber(seat.getSeatNumber());
