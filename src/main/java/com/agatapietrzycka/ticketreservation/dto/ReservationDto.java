@@ -23,4 +23,5 @@ public class ReservationDto {
     LocalDateTime departureDate;
     Integer seatNumber;
     ReservationStatus reservationStatus;
+    Double price;
 }

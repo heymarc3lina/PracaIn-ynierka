@@ -189,6 +189,7 @@ public class ReservationService {
         reservationDto.setReservationStatus(reservation.getReservationInformation().getReservationStatus());
         reservationDto.setArrivalDate(flight.getArrivalDate());
         reservationDto.setDepartureDate(flight.getDepartureDate());
+        reservationDto.setPrice(flight.getPrice() * reservation.getSeat().getClassType().getCalculatePrice());
         return reservationDto;
     }
 
