@@ -25,6 +25,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation group: 'org.liquibase', name: 'liquibase-core', version: '4.0.0'
     implementation 'com.auth0:java-jwt:3.8.3'
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
@@ -35,6 +36,17 @@ dependencies {
     implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
     implementation group: 'org.springframework', name: 'spring-context-support', version: '5.2.8.RELEASE'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.5.4'
+//    //test
+    testImplementation group: 'com.h2database', name: 'h2', version: '1.4.200'
+//    testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '5.5.2'
+//    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+//    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+//    implementation 'org.springframework.boot:spring-boot-starter'
+//    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+//        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine' // <- No version
+//    }
+//    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.20.2'
+//    testRuntimeOnly 'org.assertj:assertj-core:3.20.2'
 
 }
 
