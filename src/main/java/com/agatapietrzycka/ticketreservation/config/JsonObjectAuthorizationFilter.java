@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class JsonObjectAuthorizationFilter  extends UsernamePasswordAuthenticationFilter {
+public class JsonObjectAuthorizationFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
 
     public JsonObjectAuthorizationFilter(ObjectMapper objectMapper) {

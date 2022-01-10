@@ -28,7 +28,8 @@ public class EmailService {
         simpleMailMessage.setFrom("noreply@reservation-service.com");
         simpleMailMessage.setTo(token.getUser().getEmail());
         simpleMailMessage.setSubject("Reservation service - Account activation");
-        simpleMailMessage.setText("Click link to activate an account: \n" +
+        simpleMailMessage.setText("Witamy Cię w naszym serwisie.\n Bardzo się cieszymy, że do nas dołączasz. \n\n" +
+                "Kliknij w link w celu aktywacji utworzonego konta: \n" +
                 "http://localhost:8081/ticketreservation/api/register/activate/" + token.getToken());
         emailSender.send(simpleMailMessage);
     }
@@ -41,17 +42,17 @@ public class EmailService {
         simpleMailMessage.setSubject("Reservation service - Reservation Summary");
         List<String> seatsList = new ArrayList<>();
         seats.forEach(s -> {
-            seatsList.add("Seat number and class: " + s.getSeatNumber() + " " + s.getClassType().getClassType().name() + "\n");
+            seatsList.add("Klasa i numer miejsca: " + s.getSeatNumber() + " " + s.getClassType().getClassType().name() + "\n");
         });
-        simpleMailMessage.setText("Thanks for your reservation! \n" +
-                "Here is your reservation summary: \n" +
-                "Reservation time: " + reservationDate.format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
-                "Name and surname: " + user.getName() + " " + user.getSurname() + "\n " +
-                "Plane: " + flight.getPlane().getName() + "\n" +
-                "Departure airport and date: " + flight.getDepartureAirport().getCity() + " " + flight.getDepartureDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
-                "Arrival airport and date: " + flight.getArrivalAirport().getCity() + " " + flight.getArrivalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
-                "Seats: \n" + String.join("", seatsList) + "\n" +
-                "Price: " + price + " pln\n");
+        simpleMailMessage.setText("Dziękujemy za złożenie rezerwacji! \n\n" +
+                "Tutaj znajduje się podsumowanie złożonej przez Ciebie rezerwacji: \n" +
+                "Czas złożenia rezerwacji: " + reservationDate.format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
+                "Imię i nazwisko: " + user.getName() + " " + user.getSurname() + "\n" +
+                "Samolot: " + flight.getPlane().getName() + "\n" +
+                "Miejsce i czas odlotu: " + flight.getDepartureAirport().getCity() + " " + flight.getDepartureDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
+                "Miejsce i czas przylotu: " + flight.getArrivalAirport().getCity() + " " + flight.getArrivalDate().format(DateTimeFormatter.ofPattern(DATE_FORMAT_WITH_TIME)) + "\n" +
+                "Cena: " + price + " zł\n" +
+                "Miejsca: \n" + String.join("", seatsList) + "\n");
         emailSender.send(simpleMailMessage);
     }
 }

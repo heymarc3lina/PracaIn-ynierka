@@ -46,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors()
                 .and().csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "http://localhost:4200/**").permitAll()//allow CORS option calls
+                .antMatchers(HttpMethod.OPTIONS, "http://flightreservation.service/**").permitAll()//allow CORS option calls
                 .antMatchers("/ticketreservation/api/flight/allFlight").permitAll()
                 .antMatchers("/ticketreservation/api/flight/findFlight").permitAll()
                 .antMatchers("/swagger-ui.html").permitAll()
@@ -76,7 +76,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:4200/");
+        config.addAllowedOrigin("http://flightreservation.service/");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
