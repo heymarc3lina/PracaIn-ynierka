@@ -91,7 +91,7 @@ public class FlightService {
         List<Flight> flights = flightRepository.findAll().stream()
                 .sorted(Comparator.comparing(Flight::getDepartureDate).reversed())
                 .collect(Collectors.toList());
-        ;
+
         for (Flight flight : flights) {
             if (flight.getFlightInformation().getStatus() == FlightStatus.AVAILABLE || flight.getFlightInformation().getStatus() == FlightStatus.FULL) {
                 if (compareDate(flight.getArrivalDate(), flight.getDepartureDate(), false)) {
@@ -172,8 +172,6 @@ public class FlightService {
             flightStatuses = List.of(FlightStatus.CANCELLED);
         } else if (flightStatus == FlightStatus.NEW) {
             flightStatuses = List.of(FlightStatus.AVAILABLE, FlightStatus.CANCELLED);
-        } else if (flightStatus == FlightStatus.OVERDATE) {
-            flightStatuses = List.of(FlightStatus.CANCELLED);
         }
 
         return flightStatuses;
@@ -235,7 +233,7 @@ public class FlightService {
         }
         int compareArrival = arrivalDate.compareTo(currentTime);
         int compareDeparture = departureDate.compareTo(currentTime);
-        if (compareArrival <= 0 || compareDeparture <= 0) {
+        if (compareArrival <= 0 || compareDeparture <= 0 || arrivalDate.compareTo(departureDate) <= 0) {
             return true;
         }
         return false;
