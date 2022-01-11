@@ -31,7 +31,6 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -194,7 +193,7 @@ public class ReservationService {
     }
 
     private Boolean compareDate(LocalDateTime departureDate) {
-        LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("UTC"));
+        LocalDateTime currentTime = LocalDateTime.now();
 
         int compareDeparture = departureDate.compareTo(currentTime);
         if (compareDeparture <= 0) {
