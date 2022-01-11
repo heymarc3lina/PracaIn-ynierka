@@ -66,9 +66,12 @@ public class FlightService {
     @Transactional
     public FlightWithFlightStatusesDto updateFlight(Long flightId, CreateOrUpdateFlightDto flightUpdateDto) {
         Flight flight = flightRepository.findById(flightId).orElseThrow();
-        fillFlight(flight, flightUpdateDto);
-        validateFlight(flight);
-        return mapToFlightWithFlightStatusesDto(flight);
+        if (flight.getFlightInformation().getStatus() == FlightStatus.NEW) {
+            fillFlight(flight, flightUpdateDto);
+            validateFlight(flight);
+            return mapToFlightWithFlightStatusesDto(flight);
+        }
+        throw new CustomFlightException("Cannot update flight with another status than NEW");
     }
 
     @Transactional(readOnly = true)
@@ -80,9 +83,12 @@ public class FlightService {
 
     public UpdateFlightDto getDataToUpdate(Long flightId) {
         Flight flight = flightRepository.findById(flightId).orElseThrow();
-        FlightDto flightDto = mapToFlightDto(flight);
-        AirportAndPlaneDto airportAndPlaneDto = new AirportAndPlaneDto(airportRepository.findAll(), planeRepository.findAll());
-        return new UpdateFlightDto(flightDto, airportAndPlaneDto);
+        if (flight.getFlightInformation().getStatus() == FlightStatus.NEW) {
+            FlightDto flightDto = mapToFlightDto(flight);
+            AirportAndPlaneDto airportAndPlaneDto = new AirportAndPlaneDto(airportRepository.findAll(), planeRepository.findAll());
+            return new UpdateFlightDto(flightDto, airportAndPlaneDto);
+        }
+        throw new CustomFlightException("Cannot update flight with another status than NEW");
     }
 
 
@@ -135,7 +141,7 @@ public class FlightService {
         List<String> errorMessage = validateFlight(flightInformation);
         if (errorMessage.isEmpty()) {
             if (flightStatusDto.getFlightStatus() == FlightStatus.NEW) {
-                throw new CustomFlightException("You can't set " + flightStatusDto.getFlightStatus() + " status. It has already another status: . " + flightInformation.getStatus());
+                throw new CustomFlightException("You can't set " + flightStatusDto.getFlightStatus() + " status. It has already another status: " + flightInformation.getStatus());
             } else {
                 flightInformation.setStatus(flightStatusDto.getFlightStatus());
                 flightInformation.setUpdatedAt(Instant.now());
@@ -216,7 +222,7 @@ public class FlightService {
         if (flight.getArrivalAirport().getAirportId() == flight.getDepartureAirport().getAirportId()) {
             throw new CustomFlightException("The same airports are chosen: arrival airport = departure airport.");
         }
-        if (flight.getArrivalDate() == flight.getDepartureDate() || compareDate(flight.getArrivalDate(), flight.getDepartureDate(), true)) {
+        if (flight.getArrivalDate().equals(flight.getDepartureDate()) || compareDate(flight.getArrivalDate(), flight.getDepartureDate(), true)) {
             throw new CustomFlightException("Dates are the same or are overdue.");
         }
 
@@ -227,13 +233,13 @@ public class FlightService {
     private Boolean compareDate(LocalDateTime arrivalDate, LocalDateTime departureDate, boolean creatingFlight) {
         LocalDateTime currentTime = LocalDateTime.now(ZoneId.of("UTC"));
         if (creatingFlight) {
-            currentTime.plusHours(5);
+            currentTime = currentTime.plusHours(5);
         } else {
-            currentTime.plusHours(3);
+            currentTime = currentTime.plusHours(3);
         }
         int compareArrival = arrivalDate.compareTo(currentTime);
         int compareDeparture = departureDate.compareTo(currentTime);
-        if (compareArrival <= 0 || compareDeparture <= 0 || arrivalDate.compareTo(departureDate) <= 0) {
+        if (compareArrival <= 0 || compareDeparture <= 0) {
             return true;
         }
         return false;
