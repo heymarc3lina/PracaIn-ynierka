@@ -113,7 +113,7 @@ public class UserService implements UserDetailsService {
             UserDto userDto = new UserDto();
             userDto.setId(user.getUserId());
             userDto.setName(user.getName());
-            userDto.setSurname(user.getName());
+            userDto.setSurname(user.getSurname());
             userDto.setEmail(user.getEmail());
             userDto.setRole(user.getRoles().stream().findFirst().orElseThrow(() -> new CustomUserException("User does not have any role")).getRole().name());
             userDto.setActivationDate(user.getActivationDate());

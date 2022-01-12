@@ -74,6 +74,7 @@ public class ReservationServiceTest {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationInformationRepository reservationInformationRepository;
+
     private Airport airport1, airport4;
     private Plane plane;
     private FlightInformation flightInformation, flightInformation1, flightInformation2;

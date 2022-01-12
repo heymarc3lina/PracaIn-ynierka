@@ -8,14 +8,29 @@ import com.agatapietrzycka.ticketreservation.dto.FlightWithFlightStatusesDto;
 import com.agatapietrzycka.ticketreservation.dto.ResponseDto;
 import com.agatapietrzycka.ticketreservation.dto.UpdateFlightDto;
 import com.agatapietrzycka.ticketreservation.entity.Airport;
+import com.agatapietrzycka.ticketreservation.entity.Class;
 import com.agatapietrzycka.ticketreservation.entity.Flight;
 import com.agatapietrzycka.ticketreservation.entity.FlightInformation;
 import com.agatapietrzycka.ticketreservation.entity.Plane;
+import com.agatapietrzycka.ticketreservation.entity.Reservation;
+import com.agatapietrzycka.ticketreservation.entity.ReservationInformation;
+import com.agatapietrzycka.ticketreservation.entity.Role;
+import com.agatapietrzycka.ticketreservation.entity.Seat;
+import com.agatapietrzycka.ticketreservation.entity.User;
+import com.agatapietrzycka.ticketreservation.entity.enums.ClassType;
 import com.agatapietrzycka.ticketreservation.entity.enums.FlightStatus;
+import com.agatapietrzycka.ticketreservation.entity.enums.ReservationStatus;
+import com.agatapietrzycka.ticketreservation.entity.enums.RoleType;
 import com.agatapietrzycka.ticketreservation.repository.AirportRepository;
+import com.agatapietrzycka.ticketreservation.repository.ClassRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightInformationRepository;
 import com.agatapietrzycka.ticketreservation.repository.FlightRepository;
 import com.agatapietrzycka.ticketreservation.repository.PlaneRepository;
+import com.agatapietrzycka.ticketreservation.repository.ReservationInformationRepository;
+import com.agatapietrzycka.ticketreservation.repository.ReservationRepository;
+import com.agatapietrzycka.ticketreservation.repository.RoleRepository;
+import com.agatapietrzycka.ticketreservation.repository.SeatRepository;
+import com.agatapietrzycka.ticketreservation.repository.UserRepository;
 import com.agatapietrzycka.ticketreservation.util.exception.CustomFlightException;
 import com.agatapietrzycka.ticketreservation.validation.ApplicationConstants;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +43,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,10 +69,26 @@ public class FlightServiceTest {
     @Autowired
     private FlightInformationRepository flightInformationRepository;
 
+    @Autowired
+    RoleRepository roleRepository;
+    @Autowired
+    SeatRepository seatRepository;
+    @Autowired
+    ClassRepository classRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationInformationRepository reservationInformationRepository;
+
     private Airport airport1, airport4;
     private Plane plane;
     private FlightInformation flightInformation, flightInformation1, flightInformation2, flightInformation3;
     private Flight flight, flight1, flight2, flight3;
+    private User user;
+    private Reservation reservation;
+    private Seat seat1;
 
     @BeforeEach
     public void setUp() {
@@ -89,11 +121,14 @@ public class FlightServiceTest {
         newFlightInformation3.setUpdatedAt(Instant.now());
         newFlightInformation3.setStatus(FlightStatus.NEW);
 
+        FlightInformation newFlightInformation4 = new FlightInformation();
+        newFlightInformation4.setUpdatedAt(Instant.now().plusSeconds(3600));
+        newFlightInformation4.setStatus(FlightStatus.AVAILABLE);
+
         flightInformation = flightInformationRepository.save(newFlightInformation);
         flightInformation1 = flightInformationRepository.save(newFlightInformation1);
         flightInformation2 = flightInformationRepository.save(newFlightInformation2);
         flightInformation3 = flightInformationRepository.save(newFlightInformation3);
-
 
         Flight newFlight = new Flight();
         newFlight.setArrivalAirport(airport1);
@@ -140,14 +175,63 @@ public class FlightServiceTest {
 
         flight3 = flightRepository.save(newFlight3);
         flightInformation3.setFlight(flight3);
+
+        Role newRole = new Role();
+        newRole.setRole(RoleType.USER);
+        Role role = roleRepository.save(newRole);
+
+        User newUser = new User();
+        newUser.setCreatedDate(Instant.now());
+        newUser.setActivationDate(LocalDateTime.now());
+        newUser.setActive(true);
+        newUser.setEmail("user@user.pl");
+        newUser.setPassword("12345");
+        newUser.setSurname("User");
+        newUser.setName("Testowy");
+        newUser.setRoles(Set.of(role));
+        user = userRepository.save(newUser);
+
+        Class clasType = classRepository.save(new Class(null, 1.0, ClassType.ECONOMIC));
+
+        Seat newSeat2 = new Seat();
+        newSeat2.setClassType(clasType);
+        newSeat2.setPlane(plane);
+        newSeat2.setSeatNumber(2);
+        seatRepository.save(newSeat2);
+
+        Seat newSeat = new Seat();
+        newSeat.setClassType(clasType);
+        newSeat.setPlane(plane);
+        newSeat.setSeatNumber(1);
+        seat1 = seatRepository.save(newSeat);
+
+        ReservationInformation newReservationInformation = new ReservationInformation();
+        newReservationInformation.setReservationStatus(ReservationStatus.ACTIVE);
+        newReservationInformation.setUpdatedAt(Instant.now());
+        ReservationInformation information = reservationInformationRepository.save(newReservationInformation);
+
+        Reservation newReservation = new Reservation();
+        newReservation.setFlight(flight);
+        newReservation.setReservationDate(LocalDateTime.now());
+        newReservation.setReservationInformation(information);
+        newReservation.setSeat(seat1);
+        newReservation.setUser(user);
+        reservation = reservationRepository.save(newReservation);
+        information.setReservation(reservation);
+
     }
 
     @AfterEach
     public void clean() {
+        reservationRepository.deleteAll();
+        reservationInformationRepository.deleteAll();
         flightRepository.deleteAll();
         flightInformationRepository.deleteAll();
         airportRepository.deleteAll();
+        seatRepository.deleteAll();
         planeRepository.deleteAll();
+        userRepository.deleteAll();
+        roleRepository.deleteAll();
     }
 
     @Test
@@ -165,7 +249,6 @@ public class FlightServiceTest {
         FlightWithFlightStatusesDto flight = flightService.createFlight(dto);
 
         //then
-
         assertEquals(dto.getArrivalAirport(), flight.getFlightDto().getArrivalAirports());
         assertEquals("NEW", flight.getFlightDto().getFlightStatus().name());
         assertEquals(dto.getArrivalDate(), flight.getFlightDto().getArrivalDate());
@@ -173,7 +256,6 @@ public class FlightServiceTest {
         assertEquals(dto.getDepartureDate(), flight.getFlightDto().getDepartureDate());
         assertEquals(plane.getPlaneId(), flight.getFlightDto().getPlaneId());
         assertEquals(dto.getPrice(), flight.getFlightDto().getMinPrice());
-
     }
 
 
@@ -423,5 +505,20 @@ public class FlightServiceTest {
         assertThatExceptionOfType(CustomFlightException.class)
                 .isThrownBy(() -> flightService.changeStatus(dto))
                 .withMessage("You can't set NEW status. It has already another status: AVAILABLE");
+    }
+
+    @Test
+    public void changeStatusCase2Test() {
+        //given:
+        FlightStatusDto dto = new FlightStatusDto();
+        dto.setFlightId(flight.getId());
+        dto.setFlightStatus(FlightStatus.CANCELLED);
+        //when:
+        ResponseDto responseDto = flightService.changeStatus(dto);
+        //then:
+        assertEquals(0, responseDto.getErrorMessage().size());
+        assertEquals(flight.getId(), responseDto.getId());
+        assertEquals(reservation.getReservationId(), reservationRepository.findAllByFlightId(flight.getId()).get(0).getReservationId());
+        assertEquals(ReservationStatus.CANCELED, reservationRepository.findAllByFlightId(flight.getId()).get(0).getReservationInformation().getReservationStatus());
     }
 }
