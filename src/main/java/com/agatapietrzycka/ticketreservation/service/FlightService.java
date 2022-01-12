@@ -113,10 +113,15 @@ public class FlightService {
 
     @Transactional(readOnly = true)
     public List<FlightDto> getAllAvailableOrFullFlights() {
-        List<Flight> flights = flightRepository.findAllFlightsAtStatus();
+        List<Flight> flights = flightRepository.findAllFlightsAtStatus()
+                .stream()
+                .sorted(Comparator.comparing(Flight::getDepartureDate))
+                .collect(Collectors.toList());
         overdateingFlights(flights);
         return flights.stream()
                 .map(this::mapToFlightDto)
+                .collect(Collectors.toList())
+                .stream().filter(e -> e.getFlightStatus() != FlightStatus.OVERDATE)
                 .collect(Collectors.toList());
     }
 
@@ -127,7 +132,6 @@ public class FlightService {
                 if (compareDate(flight.getArrivalDate(), flight.getDepartureDate(), false)) {
                     flight.getFlightInformation().setStatus(FlightStatus.OVERDATE);
                     flight.getFlightInformation().setUpdatedAt(Instant.now());
-                    flights.remove(flight);
                 }
             }
         }

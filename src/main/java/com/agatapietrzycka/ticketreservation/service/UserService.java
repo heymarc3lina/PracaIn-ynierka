@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -107,7 +108,10 @@ public class UserService implements UserDetailsService {
     }
 
     public List<UserDto> getUsers() {
-        List<User> allUsers = userRepository.findAll();
+        List<User> allUsers = userRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(User::getCreatedDate).reversed())
+                .collect(Collectors.toList());
         List<UserDto> userDtos = new ArrayList<>();
         allUsers.forEach(user -> {
             UserDto userDto = new UserDto();
